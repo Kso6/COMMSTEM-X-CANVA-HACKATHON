@@ -311,51 +311,51 @@ function initMap(){
     {
       name: "Parramatta",
       samplingPoints: [
-        {lat: -33.8151, lng: 151.0000}, // Parramatta CBD + station
-        {lat: -33.8165, lng: 151.0015}, // Westfield Parramatta
-        {lat: -33.8140, lng: 150.9985}, // Commercial district
-        {lat: -33.8175, lng: 151.0025}, // Dense residential
-        {lat: -33.8155, lng: 151.0005}, // Mixed development
+        {lat: -33.8151, lng: 151.0000}, 
+        {lat: -33.8165, lng: 151.0015}, 
+        {lat: -33.8140, lng: 150.9985}, 
+        {lat: -33.8175, lng: 151.0025}, 
+        {lat: -33.8155, lng: 151.0005}, 
       ]
     },
     {
       name: "Silverwater",
       samplingPoints: [
-        {lat: -33.8293, lng: 151.0457}, // Industrial estate
-        {lat: -33.8305, lng: 151.0470}, // Commercial development
-        {lat: -33.8285, lng: 151.0445}, // Mixed industrial
-        {lat: -33.8315, lng: 151.0480}, // Transport corridor
-        {lat: -33.8300, lng: 151.0465}, // Business area
+        {lat: -33.8293, lng: 151.0457}, 
+        {lat: -33.8305, lng: 151.0470}, 
+        {lat: -33.8285, lng: 151.0445}, 
+        {lat: -33.8315, lng: 151.0480}, 
+        {lat: -33.8300, lng: 151.0465}, 
       ]
     },
     {
       name: "Canada Bay",
       samplingPoints: [
-        {lat: -33.8558, lng: 151.1024}, // Commercial center
-        {lat: -33.8570, lng: 151.1035}, // Shopping area
-        {lat: -33.8550, lng: 151.1015}, // Dense residential
-        {lat: -33.8580, lng: 151.1045}, // Mixed development
-        {lat: -33.8565, lng: 151.1030}, // Local center
+        {lat: -33.8558, lng: 151.1024}, 
+        {lat: -33.8570, lng: 151.1035}, 
+        {lat: -33.8550, lng: 151.1015}, 
+        {lat: -33.8580, lng: 151.1045},
+        {lat: -33.8565, lng: 151.1030}, 
       ]
     },
     {
       name: "Marrickville",
       samplingPoints: [
-        {lat: -33.9115, lng: 151.1559}, // Marrickville station area
-        {lat: -33.9125, lng: 151.1570}, // Commercial strip
-        {lat: -33.9105, lng: 151.1550}, // Dense residential
-        {lat: -33.9135, lng: 151.1580}, // Mixed development
-        {lat: -33.9120, lng: 151.1565}, // Transport area
+        {lat: -33.9115, lng: 151.1559}, 
+        {lat: -33.9125, lng: 151.1570}, 
+        {lat: -33.9105, lng: 151.1550}, 
+        {lat: -33.9135, lng: 151.1580}, 
+        {lat: -33.9120, lng: 151.1565}, 
       ]
     },
     {
       name: "Randwick",
       samplingPoints: [
-        {lat: -33.9148, lng: 151.2321}, // UNSW + hospital district
-        {lat: -33.9160, lng: 151.2335}, // Commercial center
-        {lat: -33.9140, lng: 151.2310}, // Dense residential
-        {lat: -33.9170, lng: 151.2345}, // Mixed development
-        {lat: -33.9155, lng: 151.2330}, // Education precinct
+        {lat: -33.9148, lng: 151.2321}, 
+        {lat: -33.9160, lng: 151.2335}, 
+        {lat: -33.9140, lng: 151.2310}, 
+        {lat: -33.9170, lng: 151.2345}, 
+        {lat: -33.9155, lng: 151.2330}, 
       ]
     }
   ];
@@ -364,17 +364,15 @@ function initMap(){
   appState.layers.heat = L.layerGroup();
   appState.layers.heat.addTo(map);
 
-  // Fetch real temperature data and identify heat islands per suburb
+ 
   fetchHeatIslandData(sydneySuburbs);
 
-  // Trees layer (user paint) - don't add by default
-  // Tree icons layer (build but don't add to map yet)
+  
   buildTreeIconsLayer();
 
-  // Simple impact overlay based on initial tree count
   buildImpactLayer(getTreeCount());
 
-  // Fetch weather initially and on move end (debounced)
+  
   fetchWeatherForCenter();
   let weatherTimer = null;
   map.on('moveend', ()=>{
