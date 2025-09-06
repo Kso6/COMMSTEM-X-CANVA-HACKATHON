@@ -5,7 +5,8 @@ const appState = {
   points: [],
   readings: JSON.parse(localStorage.getItem('canopy_readings')||'[]'),
   treePolygons: [],
-  ui: { mode: 'heat' }
+  ui: { mode: 'heat' },
+  weather: { lastCenter: null, data: null }
 };
 
 function initMap(){
@@ -46,6 +47,14 @@ function initMap(){
 
   // Simple impact overlay based on slider
   buildImpactLayer(getCoolingPercent());
+
+  // Fetch weather initially and on move end (debounced)
+  fetchWeatherForCenter();
+  let weatherTimer = null;
+  map.on('moveend', ()=>{
+    clearTimeout(weatherTimer);
+    weatherTimer = setTimeout(fetchWeatherForCenter, 250);
+  });
 }
 
 function tempColor(t){
@@ -81,7 +90,6 @@ function toggleMode(mode){
   if(mode==='impact'){ layers.impact && layers.impact.addTo(map);} 
   if(mode==='trees'){ layers.trees && layers.trees.addTo(map);} 
   if(mode==='readings'){ layers.readings && layers.readings.addTo(map);} 
-  refreshInsights();
 }
 
 function renderReadings(){
@@ -106,35 +114,47 @@ function saveReading(temp, notes){
   refreshInsights();
 }
 
-function refreshInsights(){
-  const list = document.getElementById('insightsList');
-  list.innerHTML = '';
-  const mode = appState.ui.mode;
-  if(mode==='heat'){
-    const hottest = [...appState.points].sort((a,b)=>b[2]-a[2])[0];
-    const avg = appState.points.reduce((s,p)=>s+p[2],0)/appState.points.length;
-    addInsight(`Hottest hotspot: ${hottest[2]}°C`);
-    addInsight(`Average hotspot temp: ${avg.toFixed(1)}°C`);
-    addInsight('Tip: target shaded corridors near transit stops.');
-  } else if(mode==='impact'){
-    const factor = 1.5 * (getCoolingPercent()/10);
-    addInsight(`Estimated cooling in hotspots: -${factor.toFixed(1)}°C`);
-    addInsight('Up to 12% lower A/C demand within 500m radius.');
-    addInsight('Prioritize schoolyards and parking lots.');
-  } else if(mode==='trees'){
-    addInsight('Drag on map to paint tree clusters.');
-    addInsight('Native species maximize biodiversity.');
-  } else if(mode==='readings'){
-    addInsight('Crowdsource micro-climate data street by street.');
-    addInsight(`${appState.readings.length} community readings saved locally.`);
+// Weather integration (OpenWeather Current Weather)
+async function fetchWeatherForCenter(){
+  const center = appState.map.getCenter();
+  const lat = center.lat.toFixed(4);
+  const lon = center.lng.toFixed(4);
+  const key = 'acce1388ea5659880c18e478e553acec';
+  try{
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('weather http '+res.status);
+    const data = await res.json();
+    appState.weather = { lastCenter: {lat,lon}, data };
+    renderWeather();
+  }catch(err){
+    // optional: show minimal error state
+    const el = document.getElementById('wUpdated');
+    if(el) el.textContent = 'Weather unavailable';
   }
 }
 
-function addInsight(text){
-  const li = document.createElement('li');
-  li.textContent = text;
-  document.getElementById('insightsList').appendChild(li);
+function renderWeather(){
+  const d = appState.weather?.data; if(!d) return;
+  const city = d.name || 'Here';
+  const temp = Math.round(d.main?.temp ?? 0);
+  const feels = Math.round(d.main?.feels_like ?? 0);
+  const hum = Math.round(d.main?.humidity ?? 0);
+  const wind = (d.wind?.speed ?? 0).toFixed(1);
+  const cond = (d.weather && d.weather[0] && d.weather[0].description) ? d.weather[0].description : '—';
+  const now = new Date();
+  const fmt = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  setText('wCity', city);
+  setText('wTemp', String(temp));
+  setText('wFeels', `feels like ${feels}°C`);
+  setText('wHum', `${hum}% humidity`);
+  setText('wWind', `${wind} m/s wind`);
+  setText('wCond', capitalize(cond));
+  setText('wUpdated', `Updated ${fmt}`);
 }
+
+function setText(id, text){ const el=document.getElementById(id); if(el) el.textContent=text; }
+function capitalize(s){ return s? s.charAt(0).toUpperCase()+s.slice(1): s; }
 
 function enableTreePainting(){
   let isMouseDown = false;
@@ -182,7 +202,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   initMap();
   initUI();
   enableTreePainting();
-  refreshInsights();
   if(!localStorage.getItem('canopy_seen')){
     document.getElementById('onboarding').showModal();
     localStorage.setItem('canopy_seen','1');

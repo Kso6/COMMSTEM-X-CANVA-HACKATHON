@@ -45,9 +45,24 @@
           <button id="toggleReadings" class="btn toggle">Community</button>
         </div>
       </div>
-      <div class="card insights">
-        <h2>Insights</h2>
-        <ul id="insightsList" class="insights-list"></ul>
+      <div class="card weather">
+        <h2>Weather now</h2>
+        <div id="weatherSummary" class="weather-summary">
+          <div class="w-row">
+            <div class="w-main"><span id="wCity">—</span></div>
+            <div class="w-temp"><span id="wTemp">—</span>°C</div>
+          </div>
+          <div class="w-meta">
+            <span id="wCond">—</span>
+            <span>•</span>
+            <span id="wFeels">feels like —°C</span>
+            <span>•</span>
+            <span id="wHum">—% humidity</span>
+            <span>•</span>
+            <span id="wWind">— m/s wind</span>
+          </div>
+          <div class="w-updated" id="wUpdated">Updated —</div>
+        </div>
       </div>
     </section>
     <section class="map-panel">

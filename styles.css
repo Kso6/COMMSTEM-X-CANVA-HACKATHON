@@ -23,8 +23,13 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;ba
 .controls .control{display:flex;flex-direction:column;gap:6px;margin:8px 0}
 .controls .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .hint{color:var(--muted);font-size:12px}
-.insights-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
-.insights-list li{padding:10px 12px;background:#0d141f;border:1px solid rgba(255,255,255,.06);border-radius:12px}
+.insights-list{display:none}
+.weather .weather-summary{display:flex;flex-direction:column;gap:8px}
+.weather .w-row{display:flex;align-items:center;justify-content:space-between}
+.weather .w-main{font-weight:700;letter-spacing:.2px}
+.weather .w-temp{font-size:28px;font-weight:800;line-height:1}
+.weather .w-meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px}
+.weather .w-updated{color:var(--muted);font-size:11px}
 .map-panel{position:relative;border-radius:var(--card-radius);overflow:hidden}
 .map-panel #map{height:100%;width:100%;min-height:420px;border-radius:var(--card-radius)}
 .legend{position:absolute;bottom:12px;right:12px;padding:8px 10px;background:rgba(7,10,15,.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#dfe8f5}
