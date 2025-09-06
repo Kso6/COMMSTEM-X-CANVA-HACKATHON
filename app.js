@@ -279,12 +279,53 @@ function buildTreeIconsLayer(){
   
   const treeMarkers = [];
   
-  // If there's a selected heat spot, focus on it; otherwise show all
+  // Only show trees if there's a selected heat spot or if we're showing all
   const spotsToProcess = appState.selectedHeatSpot ? 
     [[appState.selectedHeatSpot.lat, appState.selectedHeatSpot.lng, appState.selectedHeatSpot.temp]] : 
-    appState.points;
+    []; // Don't show any trees if no heat spot is selected
   
   spotsToProcess.forEach(([lat, lng, temp], index) => {
+    const spotKey = `${lat}_${lng}`;
+    // Initialize with 3 trees if not set
+    if (!appState.treeDensities[spotKey]) {
+      appState.treeDensities[spotKey] = 3;
+    }
+    
+    const density = appState.treeDensities[spotKey];
+    const coverage = getCoolingPercent();
+    const adjustedDensity = Math.max(1, Math.round(density * (coverage / 10)));
+    
+    // Create multiple trees in a small cluster for each heat spot
+    for (let i = 0; i < adjustedDensity; i++) {
+      const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset
+      const offsetLng = (Math.random() - 0.5) * 0.001;
+      
+      // Size based on coverage level
+      const size = Math.min(40, 20 + (coverage * 0.8));
+      
+      const treeIcon = L.icon({
+        iconUrl: 'Tree art.png',
+        iconSize: [size, size],
+        iconAnchor: [size/2, size],
+        popupAnchor: [0, -size]
+      });
+
+      const marker = L.marker([lat + offsetLat, lng + offsetLng], {icon: treeIcon});
+      treeMarkers.push(marker);
+    }
+  });
+  
+  appState.layers.treeIcons = L.layerGroup(treeMarkers);
+}
+
+// New function to build trees for all heat spots
+function buildTreeIconsLayerForAll(){
+  if(appState.layers.treeIcons){ appState.layers.treeIcons.clearLayers(); }
+  
+  const treeMarkers = [];
+  
+  // Show trees for all heat spots
+  appState.points.forEach(([lat, lng, temp], index) => {
     const spotKey = `${lat}_${lng}`;
     // Initialize with 3 trees if not set
     if (!appState.treeDensities[spotKey]) {
@@ -328,6 +369,8 @@ function toggleMode(mode){
     layers.heat && layers.heat.addTo(map);
     // Hide cooling impact card in heat mode
     document.getElementById('coolingImpactCard').style.display = 'none';
+    // Reset all heat spot highlighting when switching back to heat mode
+    resetHeatSpotHighlighting();
   } 
   if(mode==='trees'){ 
     // When trees mode is activated, show tree icons instead of hotspots
@@ -339,19 +382,60 @@ function toggleMode(mode){
   } 
 }
 
+function resetHeatSpotHighlighting() {
+  // Clear the selected heat spot
+  appState.selectedHeatSpot = null;
+  
+  // Reset all heat spots to normal appearance
+  if (appState.layers.heat) {
+    appState.layers.heat.eachLayer(layer => {
+      if (layer.setStyle) {
+        // Get the original temperature color
+        const bounds = layer.getBounds();
+        if (bounds) {
+          const center = bounds.getCenter();
+          // Find the temperature data for this spot
+          const tempData = appState.points.find(([lat, lng]) => 
+            Math.abs(lat - center.lat) < 0.002 && Math.abs(lng - center.lng) < 0.002
+          );
+          if (tempData) {
+            const [, , temp] = tempData;
+            layer.setStyle({ 
+              weight: 2, 
+              fillOpacity: 0.6,
+              color: tempColor(temp),
+              fillColor: tempColor(temp)
+            });
+          }
+        }
+      }
+    });
+  }
+  
+  // Reset plant button text and styling
+  const plantButton = document.getElementById('plantTrees');
+  if (plantButton) {
+    plantButton.textContent = '🌳 Plant Trees & See Impact';
+    plantButton.style.background = 'linear-gradient(135deg, var(--brand), #059669)';
+  }
+}
+
 function updateCoolingImpactDisplay() {
   const coverage = getCoolingPercent();
   
-  // Calculate for selected area only if available
+  // Calculate for selected area only if available, otherwise calculate for all
   let totalTrees = 0;
   if (appState.selectedHeatSpot) {
     const spotKey = `${appState.selectedHeatSpot.lat}_${appState.selectedHeatSpot.lng}`;
     const density = appState.treeDensities[spotKey] || 3;
     totalTrees = Math.max(1, Math.round(density * (coverage / 10)));
   } else {
-    totalTrees = Object.values(appState.treeDensities).reduce((sum, density) => {
-      return sum + Math.max(1, Math.round(density * (coverage / 10)));
-    }, 0);
+    // Calculate for all heat spots
+    appState.points.forEach(([lat, lng]) => {
+      const spotKey = `${lat}_${lng}`;
+      const density = appState.treeDensities[spotKey] || 3;
+      totalTrees += Math.max(1, Math.round(density * (coverage / 10)));
+    });
   }
   
   const tempReduction = (coverage * 0.15).toFixed(1); // 1.5°C per 10% coverage
@@ -468,14 +552,17 @@ function initUI(){
   
   // Main CTA button - plant trees and show impact
   document.getElementById('plantTrees').addEventListener('click',()=>{
-    if (!appState.selectedHeatSpot) {
-      alert('Please select a heat spot on the map first by clicking on it!');
-      return;
-    }
-    
     document.getElementById('coolingSlider').value = 20;
     buildImpactLayer(getCoolingPercent());
-    buildTreeIconsLayer(); // Rebuild trees with new density
+    
+    if (appState.selectedHeatSpot) {
+      // Plant trees in the selected heat spot only
+      buildTreeIconsLayer();
+    } else {
+      // Plant trees in ALL heat spots
+      buildTreeIconsLayerForAll();
+    }
+    
     toggleMode('trees');
     // Show the impact slider
     document.getElementById('impactSlider').style.display = 'block';
@@ -487,7 +574,12 @@ function initUI(){
   document.getElementById('coolingSlider').addEventListener('input',()=>{
     buildImpactLayer(getCoolingPercent());
     if(appState.ui.mode === 'trees'){ 
-      buildTreeIconsLayer(); // Rebuild trees with new density
+      // Rebuild trees based on whether we have a selection or showing all
+      if (appState.selectedHeatSpot) {
+        buildTreeIconsLayer(); // Selected area only
+      } else {
+        buildTreeIconsLayerForAll(); // All areas
+      }
       toggleMode('trees');
       updateCoolingImpactDisplay();
     }
@@ -505,15 +597,21 @@ function initUI(){
     setActiveViewButton('toggleHeat');
     // Hide impact slider when viewing heat data
     document.getElementById('impactSlider').style.display = 'none';
-    // Reset plant button text
-    document.getElementById('plantTrees').textContent = '🌳 Plant Trees & See Impact';
+    // Clear selected heat spot to reset to "plant everywhere" mode
+    appState.selectedHeatSpot = null;
+    // Reset plant button text and styling
+    const plantButton = document.getElementById('plantTrees');
+    plantButton.textContent = '🌳 Plant Trees & See Impact';
+    plantButton.style.background = 'linear-gradient(135deg, var(--brand), #059669)';
   });
   
   document.getElementById('toggleTrees').addEventListener('click',()=>{
-    if (!appState.selectedHeatSpot) {
-      alert('Please select a heat spot on the map first by clicking on it!');
-      setActiveViewButton('toggleHeat');
-      return;
+    if (appState.selectedHeatSpot) {
+      // Show trees for selected area only
+      buildTreeIconsLayer();
+    } else {
+      // Show trees for all areas
+      buildTreeIconsLayerForAll();
     }
     
     toggleMode('trees');
