@@ -10,15 +10,22 @@ const appState = {
 };
 
 function initMap(){
-  const start = [40.7128,-74.0060];
+  const start = [-33.8688, 151.2093]; // Sydney coordinates
   const map = L.map('map',{ zoomControl:true }).setView(start, 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap' }).addTo(map);
   appState.map = map;
 
-  // Sample synthetic heat points (NYC-ish)
+  // Sample synthetic heat points (Sydney)
   const hotspots = [
-    [40.7549,-73.9840,38],[40.7306,-73.9866,36],[40.7000,-73.9200,37],[40.6782,-73.9442,39],
-    [40.8075,-73.9626,35],[40.8241,-73.9448,37],[40.8484,-73.9419,36],[40.7128,-74.0060,34]
+    // Sydney hotspots
+    [-33.8688, 151.2093, 36], // Sydney CBD
+    [-33.8882, 151.1932, 38], // Newtown
+    [-33.8568, 151.2153, 35], // The Rocks
+    [-33.8752, 151.2380, 37], // Kings Cross
+    [-33.9148, 151.2321, 39], // Randwick
+    [-33.8697, 151.1070, 38], // Parramatta
+    [-33.7680, 151.1543, 37], // Macquarie Park
+    [-33.9173, 151.0642, 36]  // Bankstown
   ];
   appState.points = hotspots;
 
@@ -119,7 +126,6 @@ function saveReading(temp, notes){
   appState.readings.push({ latlng: lastClick, temp: Number(temp), notes });
   localStorage.setItem('canopy_readings', JSON.stringify(appState.readings));
   renderReadings();
-  refreshInsights();
 }
 
 // Weather integration (OpenWeather Current Weather)
@@ -246,7 +252,7 @@ function initUI(){
   document.getElementById('toggleImpact').addEventListener('click',()=>{ toggleMode('impact'); setActive('toggleImpact',true);['toggleHeat','toggleTrees','toggleReadings'].forEach(id=>setActive(id,false)); });
   document.getElementById('toggleTrees').addEventListener('click',()=>{ toggleMode('trees'); setActive('toggleTrees',true);['toggleHeat','toggleImpact','toggleReadings'].forEach(id=>setActive(id,false)); });
   document.getElementById('toggleReadings').addEventListener('click',()=>{ toggleMode('readings'); setActive('toggleReadings',true);['toggleHeat','toggleImpact','toggleTrees'].forEach(id=>setActive(id,false)); });
-  document.getElementById('githubLink').href = '#';
+  document.getElementById('githubLink').href = 'https://github.com/Kso6/COMMSTEM-X-CANVA-HACKATHON';
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
