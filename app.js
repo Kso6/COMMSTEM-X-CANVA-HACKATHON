@@ -56,7 +56,7 @@ function initMap(){
   // Initialize empty layers
   appState.layers.heat = L.layerGroup();
   appState.layers.heat.addTo(map);
-  
+
   // Fetch real temperature data for all locations
   fetchRealHeatmapData(sydneyLocations);
 
@@ -285,16 +285,23 @@ function buildTreeIconsLayer(){
     []; // Don't show any trees if no heat spot is selected
   
   spotsToProcess.forEach(([lat, lng, temp], index) => {
-    // Use slider value directly as number of trees (each step = 1 more tree)
-    const numTrees = getCoolingPercent();
+    const spotKey = `${lat}_${lng}`;
+    // Initialize with 3 trees if not set
+    if (!appState.treeDensities[spotKey]) {
+      appState.treeDensities[spotKey] = 3;
+    }
+    
+    const density = appState.treeDensities[spotKey];
+    const coverage = getCoolingPercent();
+    const adjustedDensity = Math.max(1, Math.round(density * (coverage / 10)));
     
     // Create multiple trees in a small cluster for each heat spot
-    for (let i = 0; i < numTrees; i++) {
+    for (let i = 0; i < adjustedDensity; i++) {
       const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset
       const offsetLng = (Math.random() - 0.5) * 0.001;
       
-      // Size based on tree count level
-      const size = Math.min(40, 20 + (numTrees * 0.8));
+      // Size based on coverage level
+      const size = Math.min(40, 20 + (coverage * 0.8));
       
       const treeIcon = L.icon({
         iconUrl: 'Tree art.png',
@@ -319,16 +326,23 @@ function buildTreeIconsLayerForAll(){
   
   // Show trees for all heat spots
   appState.points.forEach(([lat, lng, temp], index) => {
-    // Use slider value directly as number of trees (each step = 1 more tree)
-    const numTrees = getCoolingPercent();
+    const spotKey = `${lat}_${lng}`;
+    // Initialize with 3 trees if not set
+    if (!appState.treeDensities[spotKey]) {
+      appState.treeDensities[spotKey] = 3;
+    }
+    
+    const density = appState.treeDensities[spotKey];
+    const coverage = getCoolingPercent();
+    const adjustedDensity = Math.max(1, Math.round(density * (coverage / 10)));
     
     // Create multiple trees in a small cluster for each heat spot
-    for (let i = 0; i < numTrees; i++) {
+    for (let i = 0; i < adjustedDensity; i++) {
       const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset
       const offsetLng = (Math.random() - 0.5) * 0.001;
       
-      // Size based on tree count level
-      const size = Math.min(40, 20 + (numTrees * 0.8));
+      // Size based on coverage level
+      const size = Math.min(40, 20 + (coverage * 0.8));
       
       const treeIcon = L.icon({
         iconUrl: 'Tree art.png',
@@ -407,25 +421,25 @@ function resetHeatSpotHighlighting() {
 }
 
 function updateCoolingImpactDisplay() {
-  const treesPerArea = getCoolingPercent();
+  const coverage = getCoolingPercent();
   
-  // Calculate total trees based on number of areas and trees per area
+  // Calculate for selected area only if available, otherwise calculate for all
   let totalTrees = 0;
-  let numAreas = 0;
-  
   if (appState.selectedHeatSpot) {
-    // Only one selected area
-    numAreas = 1;
-    totalTrees = treesPerArea;
+    const spotKey = `${appState.selectedHeatSpot.lat}_${appState.selectedHeatSpot.lng}`;
+    const density = appState.treeDensities[spotKey] || 3;
+    totalTrees = Math.max(1, Math.round(density * (coverage / 10)));
   } else {
-    // All heat spots
-    numAreas = appState.points.length;
-    totalTrees = treesPerArea * numAreas;
+    // Calculate for all heat spots
+    appState.points.forEach(([lat, lng]) => {
+      const spotKey = `${lat}_${lng}`;
+      const density = appState.treeDensities[spotKey] || 3;
+      totalTrees += Math.max(1, Math.round(density * (coverage / 10)));
+    });
   }
   
-  // Calculate impact based on number of trees per area
-  const tempReduction = (treesPerArea * 0.1).toFixed(1); // 0.1°C per tree per area
-  const areaCoverage = Math.min(100, treesPerArea * 3).toFixed(0); // 3% coverage per tree
+  const tempReduction = (coverage * 0.15).toFixed(1); // 1.5°C per 10% coverage
+  const areaCoverage = Math.min(100, coverage * 3).toFixed(0); // Approximate area coverage
   
   document.getElementById('tempReduction').textContent = `-${tempReduction}°C`;
   document.getElementById('treesPlanted').textContent = `${totalTrees} trees`;
