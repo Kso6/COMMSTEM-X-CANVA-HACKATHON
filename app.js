@@ -443,49 +443,64 @@ async function fetchHeatIslandData(suburbs) {
       loadingOverlay.style.display = 'flex';
     }
     
-    // Process each suburb to find its hottest spot
-    for (let suburb of suburbs) {
-      const suburbTemperatures = [];
+    // Process suburbs in batches for faster loading
+    const batchSize = 3; // Process 3 suburbs at a time
+    for (let i = 0; i < suburbs.length; i += batchSize) {
+      const batch = suburbs.slice(i, i + batchSize);
       
-      // Sample all points in this suburb
-      for (let point of suburb.samplingPoints) {
-        try {
-          const url = `https://api.openweathermap.org/data/2.5/weather?lat=${point.lat}&lon=${point.lng}&appid=${key}&units=metric`;
-          const response = await fetch(url);
-          
-          if (response.ok) {
-            const data = await response.json();
-            const temp = data.main?.temp || 20;
-            suburbTemperatures.push({
-              lat: point.lat,
-              lng: point.lng,
-              temp: temp,
-              feels_like: data.main?.feels_like || temp,
-              humidity: data.main?.humidity || 50,
-              suburb: suburb.name
-            });
-          }
-          
-          // Rate limit: wait 100ms between requests
-          await new Promise(resolve => setTimeout(resolve, 100));
-        } catch (error) {
-          console.log(`Failed to fetch data for ${suburb.name} point:`, error);
-        }
-      }
-      
-      // Find the hottest spot in this suburb (heat island)
-      if (suburbTemperatures.length > 0) {
-        const hottestSpot = suburbTemperatures.reduce((hottest, current) => 
-          current.temp > hottest.temp ? current : hottest
-        );
+      await Promise.all(batch.map(async (suburb) => {
+        const suburbTemperatures = [];
         
-        // Always include the hottest spot in each suburb
+        // Sample all points in this suburb
+        for (let point of suburb.samplingPoints) {
+          try {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${point.lat}&lon=${point.lng}&appid=${key}&units=metric`;
+            const response = await fetch(url);
+            
+            if (response.ok) {
+              const data = await response.json();
+              const temp = data.main?.temp || 20;
+              suburbTemperatures.push({
+                lat: point.lat,
+                lng: point.lng,
+                temp: temp,
+                feels_like: data.main?.feels_like || temp,
+                humidity: data.main?.humidity || 50,
+                suburb: suburb.name
+              });
+            }
+            
+            // Shorter rate limit for faster loading
+            await new Promise(resolve => setTimeout(resolve, 15));
+          } catch (error) {
+            console.log(`Failed to fetch data for ${suburb.name} point:`, error);
+          }
+        }
+        
+        // Find the hottest spot in this suburb (heat island)
         if (suburbTemperatures.length > 0) {
+          const hottestSpot = suburbTemperatures.reduce((hottest, current) => 
+            current.temp > hottest.temp ? current : hottest
+          );
+          
+          // Always include the hottest spot in each suburb
           heatIslands.push({
             ...hottestSpot,
             name: `${suburb.name} Heat Island`
           });
         }
+      }));
+      
+      // Update progress
+      const progress = Math.round(((i + batchSize) / suburbs.length) * 100);
+      const loadingContent = document.querySelector('.loading-content p');
+      if (loadingContent) {
+        loadingContent.textContent = `Loading temperature data... ${progress}%`;
+      }
+      
+      // Small delay between batches to avoid overwhelming the API
+      if (i + batchSize < suburbs.length) {
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
     }
     
@@ -506,6 +521,12 @@ async function fetchHeatIslandData(suburbs) {
     }
     
     console.log(`Found ${heatIslands.length} real heat islands across Sydney suburbs`);
+    
+    // Update loading text to show completion
+    const loadingContent = document.querySelector('.loading-content p');
+    if (loadingContent) {
+      loadingContent.textContent = 'Processing heat data...';
+    }
     
   } catch (error) {
     console.error('Error fetching heat island data:', error);
@@ -559,9 +580,9 @@ async function fetchRealHeatmapData(locations) {
           });
         }
         
-        // Rate limit: wait 100ms between requests to avoid overwhelming the API
+        // Rate limit: wait 25ms between requests to avoid overwhelming the API
         if (i < locations.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 25));
         }
       } catch (error) {
         console.log(`Failed to fetch data for ${location.name}:`, error);
