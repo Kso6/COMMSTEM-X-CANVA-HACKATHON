@@ -97,6 +97,136 @@ function initMap(){
         {lat: -33.7075, lng: 151.1015}, // Dense residential
         {lat: -33.7055, lng: 151.0995}, // Mixed development
       ]
+    },
+    {
+      name: "Baulkham Hills",
+      samplingPoints: [
+        {lat: -33.7589, lng: 150.9892}, // Commercial center
+        {lat: -33.7600, lng: 150.9905}, // Shopping district
+        {lat: -33.7580, lng: 150.9880}, // Dense residential
+        {lat: -33.7610, lng: 150.9915}, // Mixed development
+        {lat: -33.7595, lng: 150.9900}, // Transport corridor
+      ]
+    },
+    {
+      name: "Bella Vista",
+      samplingPoints: [
+        {lat: -33.7346, lng: 150.9543}, // Commercial center
+        {lat: -33.7355, lng: 150.9555}, // Shopping area
+        {lat: -33.7338, lng: 150.9535}, // Dense residential
+        {lat: -33.7365, lng: 150.9565}, // New developments
+        {lat: -33.7350, lng: 150.9550}, // Mixed suburban
+      ]
+    },
+    {
+      name: "Box Hill",
+      samplingPoints: [
+        {lat: -33.6483, lng: 150.8967}, // Commercial center
+        {lat: -33.6495, lng: 150.8980}, // Shopping district
+        {lat: -33.6475, lng: 150.8955}, // Residential area
+        {lat: -33.6505, lng: 150.8990}, // Mixed development
+        {lat: -33.6490, lng: 150.8975}, // Transport area
+      ]
+    },
+    {
+      name: "Castle Hill",
+      samplingPoints: [
+        {lat: -33.7296, lng: 151.0035}, // Castle Towers shopping
+        {lat: -33.7310, lng: 151.0050}, // Commercial district
+        {lat: -33.7285, lng: 151.0025}, // Dense residential
+        {lat: -33.7320, lng: 151.0060}, // Mixed development
+        {lat: -33.7305, lng: 151.0045}, // Transport hub
+      ]
+    },
+    {
+      name: "Kenthurst",
+      samplingPoints: [
+        {lat: -33.6741, lng: 150.9454}, // Commercial center
+        {lat: -33.6755, lng: 150.9470}, // Mixed development
+        {lat: -33.6730, lng: 150.9440}, // Residential area
+        {lat: -33.6765, lng: 150.9480}, // Rural-suburban mix
+        {lat: -33.6750, lng: 150.9465}, // Local center
+      ]
+    },
+    {
+      name: "North Kellyville",
+      samplingPoints: [
+        {lat: -33.6968, lng: 150.9347}, // New town center
+        {lat: -33.6980, lng: 150.9360}, // Commercial development
+        {lat: -33.6960, lng: 150.9335}, // Dense residential
+        {lat: -33.6990, lng: 150.9370}, // Mixed development
+        {lat: -33.6975, lng: 150.9355}, // Transport area
+      ]
+    },
+    {
+      name: "Norwest",
+      samplingPoints: [
+        {lat: -33.7324, lng: 150.9724}, // Business park
+        {lat: -33.7335, lng: 150.9735}, // Commercial center
+        {lat: -33.7315, lng: 150.9715}, // Mixed development
+        {lat: -33.7345, lng: 150.9745}, // Office district
+        {lat: -33.7330, lng: 150.9730}, // Transport hub
+      ]
+    },
+    {
+      name: "Rouse Hill",
+      samplingPoints: [
+        {lat: -33.6859, lng: 150.9192}, // Rouse Hill Town Centre
+        {lat: -33.6870, lng: 150.9205}, // Commercial district
+        {lat: -33.6850, lng: 150.9180}, // Dense residential
+        {lat: -33.6880, lng: 150.9215}, // Mixed development
+        {lat: -33.6865, lng: 150.9200}, // Transport area
+      ]
+    },
+    {
+      name: "West Pennant Hills",
+      samplingPoints: [
+        {lat: -33.7491, lng: 151.0391}, // Commercial center
+        {lat: -33.7505, lng: 151.0405}, // Shopping area
+        {lat: -33.7480, lng: 151.0380}, // Residential area
+        {lat: -33.7515, lng: 151.0415}, // Mixed development
+        {lat: -33.7500, lng: 151.0400}, // Local center
+      ]
+    },
+    {
+      name: "Winston Hills",
+      samplingPoints: [
+        {lat: -33.7753, lng: 150.9839}, // Commercial center
+        {lat: -33.7765, lng: 150.9850}, // Shopping district
+        {lat: -33.7745, lng: 150.9830}, // Dense residential
+        {lat: -33.7775, lng: 150.9860}, // Mixed development
+        {lat: -33.7760, lng: 150.9845}, // Transport corridor
+      ]
+    },
+    {
+      name: "North Rocks",
+      samplingPoints: [
+        {lat: -33.7716, lng: 151.0147}, // Commercial center
+        {lat: -33.7730, lng: 151.0160}, // Shopping area
+        {lat: -33.7705, lng: 151.0135}, // Residential area
+        {lat: -33.7740, lng: 151.0170}, // Mixed development
+        {lat: -33.7725, lng: 151.0155}, // Local center
+      ]
+    },
+    {
+      name: "Carlingford",
+      samplingPoints: [
+        {lat: -33.7793, lng: 151.0458}, // Carlingford Court shopping
+        {lat: -33.7805, lng: 151.0470}, // Commercial district
+        {lat: -33.7785, lng: 151.0450}, // Dense residential
+        {lat: -33.7815, lng: 151.0480}, // Mixed development
+        {lat: -33.7800, lng: 151.0465}, // Transport area
+      ]
+    },
+    {
+      name: "Ryde",
+      samplingPoints: [
+        {lat: -33.8144, lng: 151.1103}, // Ryde shopping center
+        {lat: -33.8155, lng: 151.1115}, // Commercial district
+        {lat: -33.8135, lng: 151.1095}, // Dense residential
+        {lat: -33.8165, lng: 151.1125}, // Mixed development
+        {lat: -33.8150, lng: 151.1110}, // Transport hub
+      ]
     }
   ];
 
