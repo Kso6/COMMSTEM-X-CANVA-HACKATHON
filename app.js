@@ -534,16 +534,19 @@ function renderForecast(items){
 }
 
 function enableTreePainting(){
-  let isMouseDown = false;
+  // Only allow individual clicks for tree painting, not continuous painting on mouse hold
   const paint = (latlng)=>{
     const poly = L.circle(latlng,{ radius:18, color:'#60d394', fillColor:'#60d394', fillOpacity:.25, weight:1 });
     appState.layers.trees.addLayer(poly);
     appState.treePolygons.push(poly);
   };
-  appState.map.on('mousedown', ()=>{ if(appState.ui.mode==='trees'){ isMouseDown=true; }});
-  appState.map.on('mouseup', ()=> isMouseDown=false );
-  appState.map.on('mousemove', (e)=>{ if(isMouseDown && appState.ui.mode==='trees'){ paint(e.latlng); }});
-  appState.map.on('click', (e)=>{ if(appState.ui.mode==='trees'){ paint(e.latlng); }});
+  
+  // Only handle click events, removed mousedown/mousemove/mouseup handlers
+  appState.map.on('click', (e)=>{ 
+    if(appState.ui.mode==='trees'){ 
+      paint(e.latlng); 
+    }
+  });
 }
 
 function initUI(){
