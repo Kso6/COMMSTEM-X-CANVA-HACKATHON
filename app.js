@@ -394,7 +394,7 @@ function initMap(){
 function tempColor(t){
   if(t>=40) return '#d7191c';
   if(t>=37) return '#fdae61';
-  if(t>=34) return '#ffffbf';
+  if(t>=34) return '#f4c430';
   if(t>=30) return '#abd9e9';
   return '#2c7bb6';
 }
