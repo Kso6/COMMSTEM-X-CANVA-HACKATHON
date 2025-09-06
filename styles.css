@@ -4,7 +4,8 @@
   --card-radius:12px;--shadow:0 4px 12px rgba(0,0,0,.08);--border:#e2e8f0
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#fafbfc,#f1f5f9);color:var(--text)}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(135deg,#fafbfc 0%,#f1f5f9 50%,#e2e8f0 100%);color:var(--text);position:relative}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 80%,rgba(34,197,94,0.03) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(59,130,246,0.03) 0%,transparent 50%);pointer-events:none;z-index:0}
 .app-header{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(255,255,255,.95);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--border);z-index:10}
 .brand{display:flex;gap:12px;align-items:center}.logo{font-size:24px}.title{font-weight:800;letter-spacing:.3px;font-size:18px}
 .header-actions{display:flex;gap:10px}
@@ -16,13 +17,17 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;ba
 .btn.toggle{padding:8px 10px;border-radius:8px}
 .btn.toggle.active{outline:2px solid var(--accent);background:#eff6ff}
 .layout{display:grid;grid-template-columns:420px 1fr;gap:16px;padding:16px;height:calc(100vh - 62px)}
-.left-panel{display:flex;flex-direction:column;gap:16px;min-width:320px;position:relative;background-image:url('Background Tree.png');background-size:contain;background-repeat:no-repeat;background-position:center center;background-attachment:local}
-.left-panel::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.75);backdrop-filter:blur(1px);z-index:1;pointer-events:none;border-radius:var(--card-radius)}
+.left-panel{display:flex;flex-direction:column;gap:16px;min-width:320px;position:relative;background-image:url('Background Tree.png');background-size:400px auto;background-repeat:no-repeat;background-position:right bottom;background-attachment:local;overflow:hidden}
+.left-panel::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(45deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.75) 60%, rgba(255,255,255,0.5) 100%);backdrop-filter:blur(0.5px);z-index:1;pointer-events:none;border-radius:var(--card-radius)}
 .left-panel > *{position:relative;z-index:2}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--card-radius);box-shadow:var(--shadow);padding:16px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--card-radius);box-shadow:var(--shadow);padding:16px;transition:all 0.3s ease;backdrop-filter:blur(10px)}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.15);border-color:rgba(34,197,94,0.2)}
 .card.hero h1{margin:0 0 12px;font-size:32px;font-weight:700}
 .card.hero p{margin:0 0 20px;font-size:16px;line-height:1.5}
-.btn.cta-primary{background:linear-gradient(135deg,var(--brand),#059669);border:none;color:white;padding:14px 24px;font-size:16px;font-weight:600;border-radius:12px;width:100%}
+.btn.cta-primary{background:linear-gradient(135deg,var(--brand),#059669);border:none;color:white;padding:14px 24px;font-size:16px;font-weight:600;border-radius:12px;width:100%;position:relative;overflow:hidden;transition:all 0.3s ease}
+.btn.cta-primary::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.5s ease}
+.btn.cta-primary:hover::before{left:100%}
+.btn.cta-primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(34,197,94,0.3)}
 .simple-controls h2{margin:0 0 16px;font-size:18px;font-weight:600}
 .view-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .btn.view-btn{padding:16px 12px;text-align:center;border-radius:12px;font-weight:500;transition:all 0.2s ease}
@@ -30,12 +35,16 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;ba
 .impact-slider{padding:16px;background:var(--panel-2);border-radius:8px;margin-top:12px}
 .impact-slider label{display:block;margin-bottom:8px;font-weight:500}
 .slider-label{font-size:12px;color:var(--muted);margin-top:4px}
-.cooling-impact h2{margin:0 0 16px;font-size:18px;font-weight:600}
-.impact-display{display:flex;flex-direction:column;gap:12px}
-.impact-stat{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
-.impact-stat:last-child{border-bottom:none}
+.cooling-impact{position:relative;background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:1px solid #10b981;overflow:hidden}
+.cooling-impact::before{content:'🌱';position:absolute;top:-10px;right:-10px;font-size:70px;opacity:0.08;transform:rotate(15deg);pointer-events:none}
+.cooling-impact h2{margin:0 0 16px;font-size:18px;font-weight:600;position:relative;z-index:2}
+.impact-display{display:flex;flex-direction:column;gap:12px;position:relative;z-index:2}
+.impact-stat{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(16,185,129,0.2);background:rgba(255,255,255,0.6);border-radius:8px;margin-bottom:8px;transition:all 0.2s ease}
+.impact-stat:hover{transform:translateY(-1px);box-shadow:0 4px 8px rgba(16,185,129,0.1)}
+.impact-stat:last-child{border-bottom:none;margin-bottom:0}
 .stat-label{font-size:14px;color:var(--muted)}
-.stat-value{font-size:16px;font-weight:600;color:var(--brand)}
+.stat-value{font-size:16px;font-weight:600;color:var(--brand);position:relative}
+.stat-value::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:3px;background:var(--brand);border-radius:50%;opacity:0.5}
 .hint{color:var(--muted);font-size:12px}
 .insights-list{display:none}
 .current-weather h2{margin:0 0 16px;font-size:18px;font-weight:600}
@@ -52,7 +61,8 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;ba
 .skeleton{opacity:.6}
 .fab{position:absolute;bottom:12px;left:12px;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:999px;padding:10px 12px;box-shadow:var(--shadow);cursor:pointer}
 .fab:hover{transform:translateY(-1px)}
-.map-panel{position:relative;border-radius:var(--card-radius);overflow:hidden}
+.map-panel{position:relative;border-radius:var(--card-radius);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12);border:1px solid var(--border);transition:all 0.3s ease}
+.map-panel:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.15)}
 .map-panel #map{height:100%;width:100%;min-height:420px;border-radius:var(--card-radius)}
 .legend{position:absolute;bottom:12px;right:12px;padding:12px 14px;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,.08);border-radius:8px;color:var(--text);z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.1);pointer-events:auto;font-family:'Inter',sans-serif}
 .legend-title{font-size:12px;font-weight:600;margin-bottom:8px;color:#444;letter-spacing:-0.01em}
