@@ -11,8 +11,8 @@ const appState = {
 };
 
 function initMap(){
-  const start = [-33.7500, 151.0500]; // Centered to show all suburbs
-  const map = L.map('map',{ zoomControl:true }).setView(start, 11);
+  const start = [-33.8500, 150.9000]; // Centered to show all 36 suburbs
+  const map = L.map('map',{ zoomControl:true }).setView(start, 10);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap' }).addTo(map);
   appState.map = map;
 
@@ -226,6 +226,136 @@ function initMap(){
         {lat: -33.8135, lng: 151.1095}, // Dense residential
         {lat: -33.8165, lng: 151.1125}, // Mixed development
         {lat: -33.8150, lng: 151.1110}, // Transport hub
+      ]
+    },
+    {
+      name: "Liverpool",
+      samplingPoints: [
+        {lat: -33.9211, lng: 150.9234}, // Liverpool CBD + station
+        {lat: -33.9225, lng: 150.9250}, // Westfield Liverpool
+        {lat: -33.9200, lng: 150.9220}, // Commercial district
+        {lat: -33.9235, lng: 150.9260}, // Dense residential
+        {lat: -33.9215, lng: 150.9240}, // Mixed development
+      ]
+    },
+    {
+      name: "Campbelltown",
+      samplingPoints: [
+        {lat: -34.0656, lng: 150.8186}, // Campbelltown CBD + station
+        {lat: -34.0670, lng: 150.8200}, // Macarthur Square shopping
+        {lat: -34.0645, lng: 150.8175}, // Commercial district
+        {lat: -34.0680, lng: 150.8210}, // Dense residential
+        {lat: -34.0660, lng: 150.8190}, // Mixed development
+      ]
+    },
+    {
+      name: "Fairfield",
+      samplingPoints: [
+        {lat: -33.8711, lng: 150.9556}, // Fairfield CBD + station
+        {lat: -33.8725, lng: 150.9570}, // Shopping center
+        {lat: -33.8700, lng: 150.9545}, // Commercial district
+        {lat: -33.8735, lng: 150.9580}, // Dense residential
+        {lat: -33.8715, lng: 150.9560}, // Mixed development
+      ]
+    },
+    {
+      name: "Bankstown",
+      samplingPoints: [
+        {lat: -33.9173, lng: 151.0320}, // Bankstown Central + station
+        {lat: -33.9185, lng: 151.0335}, // Commercial plaza
+        {lat: -33.9165, lng: 151.0310}, // Industrial area
+        {lat: -33.9195, lng: 151.0345}, // Dense residential
+        {lat: -33.9180, lng: 151.0325}, // Mixed development
+      ]
+    },
+    {
+      name: "Cabramatta",
+      samplingPoints: [
+        {lat: -33.8967, lng: 150.9356}, // Cabramatta station + market
+        {lat: -33.8975, lng: 150.9365}, // Commercial strip
+        {lat: -33.8960, lng: 150.9350}, // Dense residential
+        {lat: -33.8985, lng: 150.9375}, // Mixed development
+        {lat: -33.8970, lng: 150.9360}, // Transport area
+      ]
+    },
+    {
+      name: "Camden",
+      samplingPoints: [
+        {lat: -34.0545, lng: 150.6957}, // Camden town center
+        {lat: -34.0555, lng: 150.6970}, // Commercial district
+        {lat: -34.0535, lng: 150.6945}, // Residential area
+        {lat: -34.0565, lng: 150.6980}, // Mixed development
+        {lat: -34.0550, lng: 150.6965}, // Local center
+      ]
+    },
+    {
+      name: "Penrith",
+      samplingPoints: [
+        {lat: -33.7506, lng: 150.6934}, // Penrith CBD + station
+        {lat: -33.7520, lng: 150.6950}, // Westfield Penrith
+        {lat: -33.7495, lng: 150.6920}, // Commercial district
+        {lat: -33.7530, lng: 150.6960}, // Dense residential
+        {lat: -33.7510, lng: 150.6940}, // Mixed development
+      ]
+    },
+    {
+      name: "Blacktown",
+      samplingPoints: [
+        {lat: -33.7689, lng: 150.9062}, // Blacktown station + CBD
+        {lat: -33.7700, lng: 150.9075}, // Westpoint shopping
+        {lat: -33.7680, lng: 150.9050}, // Commercial district
+        {lat: -33.7710, lng: 150.9085}, // Dense residential
+        {lat: -33.7695, lng: 150.9070}, // Mixed development
+      ]
+    },
+    {
+      name: "Parramatta",
+      samplingPoints: [
+        {lat: -33.8151, lng: 151.0000}, // Parramatta CBD + station
+        {lat: -33.8165, lng: 151.0015}, // Westfield Parramatta
+        {lat: -33.8140, lng: 150.9985}, // Commercial district
+        {lat: -33.8175, lng: 151.0025}, // Dense residential
+        {lat: -33.8155, lng: 151.0005}, // Mixed development
+      ]
+    },
+    {
+      name: "Silverwater",
+      samplingPoints: [
+        {lat: -33.8293, lng: 151.0457}, // Industrial estate
+        {lat: -33.8305, lng: 151.0470}, // Commercial development
+        {lat: -33.8285, lng: 151.0445}, // Mixed industrial
+        {lat: -33.8315, lng: 151.0480}, // Transport corridor
+        {lat: -33.8300, lng: 151.0465}, // Business area
+      ]
+    },
+    {
+      name: "Canada Bay",
+      samplingPoints: [
+        {lat: -33.8558, lng: 151.1024}, // Commercial center
+        {lat: -33.8570, lng: 151.1035}, // Shopping area
+        {lat: -33.8550, lng: 151.1015}, // Dense residential
+        {lat: -33.8580, lng: 151.1045}, // Mixed development
+        {lat: -33.8565, lng: 151.1030}, // Local center
+      ]
+    },
+    {
+      name: "Marrickville",
+      samplingPoints: [
+        {lat: -33.9115, lng: 151.1559}, // Marrickville station area
+        {lat: -33.9125, lng: 151.1570}, // Commercial strip
+        {lat: -33.9105, lng: 151.1550}, // Dense residential
+        {lat: -33.9135, lng: 151.1580}, // Mixed development
+        {lat: -33.9120, lng: 151.1565}, // Transport area
+      ]
+    },
+    {
+      name: "Randwick",
+      samplingPoints: [
+        {lat: -33.9148, lng: 151.2321}, // UNSW + hospital district
+        {lat: -33.9160, lng: 151.2335}, // Commercial center
+        {lat: -33.9140, lng: 151.2310}, // Dense residential
+        {lat: -33.9170, lng: 151.2345}, // Mixed development
+        {lat: -33.9155, lng: 151.2330}, // Education precinct
       ]
     }
   ];
