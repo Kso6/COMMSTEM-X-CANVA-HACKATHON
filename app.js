@@ -553,8 +553,22 @@ function initUI(){
   // Simplified UI event handlers
   document.getElementById('openOnboarding').addEventListener('click',()=>document.getElementById('onboarding').showModal());
   
-  // Main CTA button - plant trees and show impact
+  // Main CTA button - toggle between plant trees and real heat data
   document.getElementById('plantTrees').addEventListener('click',()=>{
+    // If already in trees mode, switch back to heat map
+    if (appState.ui.mode === 'trees') {
+      // Switch back to heat map view
+      toggleMode('heat');
+      setActiveViewButton('toggleHeat');
+      // Hide impact slider when viewing heat data
+      document.getElementById('impactSlider').style.display = 'none';
+      // Reset plant button text
+      document.getElementById('plantTrees').textContent = '🌳 Plant Trees & See Impact';
+      document.getElementById('plantTrees').style.background = 'linear-gradient(135deg, var(--brand), #059669)';
+      return;
+    }
+    
+    // Otherwise, plant trees and show impact
     document.getElementById('coolingSlider').value = 20;
     buildImpactLayer(getCoolingPercent());
     
@@ -571,6 +585,9 @@ function initUI(){
     document.getElementById('impactSlider').style.display = 'block';
     // Update button states
     setActiveViewButton('toggleTrees');
+    // Change button text to indicate it can toggle back
+    document.getElementById('plantTrees').textContent = '🔍 View Real Heat Data';
+    document.getElementById('plantTrees').style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
   });
   
   // Cooling slider updates
@@ -621,6 +638,9 @@ function initUI(){
     setActiveViewButton('toggleTrees');
     // Show impact slider when viewing tree impact
     document.getElementById('impactSlider').style.display = 'block';
+    // Update main button text to reflect toggle capability
+    document.getElementById('plantTrees').textContent = '🔍 View Real Heat Data';
+    document.getElementById('plantTrees').style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
   });
   
   document.getElementById('githubLink').href = 'https://github.com/Kso6/COMMSTEM-X-CANVA-HACKATHON';
