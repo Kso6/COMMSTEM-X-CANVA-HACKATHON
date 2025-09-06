@@ -56,7 +56,7 @@ function initMap(){
   // Initialize empty layers
   appState.layers.heat = L.layerGroup();
   appState.layers.heat.addTo(map);
-
+  
   // Fetch real temperature data for all locations
   fetchRealHeatmapData(sydneyLocations);
 
@@ -92,20 +92,14 @@ function tempColor(t){
   return '#2c7bb6';
 }
 
-function getTreeCount(){
-  const count = Number(document.getElementById('coolingSlider').value || '3');
-  // Update the tree count display
-  const treeCountEl = document.getElementById('treeCount');
-  if (treeCountEl) {
-    treeCountEl.textContent = count;
-  }
-  return count;
+function getTreesPerArea(){
+  const v = Number(document.getElementById('coolingSlider').value||'3');
+  return v;
 }
 
-function buildImpactLayer(treeCount){
+function buildImpactLayer(percent){
   if(appState.layers.impact){ appState.layers.impact.remove(); }
-  // Calculate cooling impact based on tree count: 0.5°C per tree
-  const factor = 0.5 * treeCount;
+  const factor = 1.5 * (percent/10); // degC drop in hotspots per +10% canopy
   const rectangles = appState.points.map(([lat,lng,temp])=>{
     const cooled = Math.max(20, temp - factor);
     const color = tempColor(cooled);
@@ -122,7 +116,7 @@ function buildImpactLayer(treeCount){
       fillOpacity: 0.3, 
       weight: 1,
       stroke: true
-    }).bindTooltip(`Impact: -${factor.toFixed(1)}°C with ${treeCount} trees`);
+    }).bindTooltip(`Impact: -${(temp-cooled).toFixed(1)}°C`);
   });
   appState.layers.impact = L.layerGroup(rectangles);
 }
@@ -291,18 +285,16 @@ function buildTreeIconsLayer(){
     []; // Don't show any trees if no heat spot is selected
   
   spotsToProcess.forEach(([lat, lng, temp], index) => {
-    const spotKey = `${lat}_${lng}`;
+    // Get number of trees directly from slider (1-10 trees per area)
+    const numTrees = getTreesPerArea();
     
-    // Get exact tree count from slider
-    const treeCount = getTreeCount();
-    
-    // Create exactly treeCount trees in a small cluster for each heat spot
-    for (let i = 0; i < treeCount; i++) {
+    // Create multiple trees in a small cluster for each heat spot
+    for (let i = 0; i < numTrees; i++) {
       const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset
       const offsetLng = (Math.random() - 0.5) * 0.001;
       
-      // Size is fixed at 30px
-      const size = 30;
+      // Fixed tree size
+      const size = 32;
       
       const treeIcon = L.icon({
         iconUrl: 'Tree art.png',
@@ -327,18 +319,16 @@ function buildTreeIconsLayerForAll(){
   
   // Show trees for all heat spots
   appState.points.forEach(([lat, lng, temp], index) => {
-    const spotKey = `${lat}_${lng}`;
+    // Get number of trees directly from slider (1-10 trees per area)
+    const numTrees = getTreesPerArea();
     
-    // Get exact tree count from slider
-    const treeCount = getTreeCount();
-    
-    // Create exactly treeCount trees in a small cluster for each heat spot
-    for (let i = 0; i < treeCount; i++) {
+    // Create multiple trees in a small cluster for each heat spot
+    for (let i = 0; i < numTrees; i++) {
       const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset
       const offsetLng = (Math.random() - 0.5) * 0.001;
       
-      // Size is fixed at 30px
-      const size = 30;
+      // Fixed tree size
+      const size = 32;
       
       const treeIcon = L.icon({
         iconUrl: 'Tree art.png',
@@ -417,27 +407,25 @@ function resetHeatSpotHighlighting() {
 }
 
 function updateCoolingImpactDisplay() {
-  const treeCount = getTreeCount();
+  const treesPerArea = getTreesPerArea();
   
-  // Calculate total trees based on selection or all areas
+  // Calculate total trees based on number of areas and trees per area
+  let numAreas = 0;
   let totalTrees = 0;
-  let areaCount = 0;
   
   if (appState.selectedHeatSpot) {
-    // Just one area with exact tree count
-    totalTrees = treeCount;
-    areaCount = 1;
+    // Only one selected area
+    numAreas = 1;
+    totalTrees = treesPerArea;
   } else {
-    // All heat spots with tree count per spot
-    totalTrees = appState.points.length * treeCount;
-    areaCount = appState.points.length;
+    // All heat spots
+    numAreas = appState.points.length;
+    totalTrees = treesPerArea * numAreas;
   }
   
-  // Calculate cooling impact: 0.5°C per tree
-  const tempReduction = (0.5 * treeCount).toFixed(1);
-  
-  // Calculate area coverage based on tree count (10% per tree, max 100%)
-  const areaCoverage = Math.min(100, treeCount * 10).toFixed(0);
+  // Calculate impact based on number of trees
+  const tempReduction = (treesPerArea * 0.3).toFixed(1); // 0.3°C per tree per area
+  const areaCoverage = Math.min(100, treesPerArea * 10).toFixed(0); // 10% coverage per tree
   
   document.getElementById('tempReduction').textContent = `-${tempReduction}°C`;
   document.getElementById('treesPlanted').textContent = `${totalTrees} trees`;
@@ -567,9 +555,7 @@ function initUI(){
     }
     
     // Otherwise, plant trees and show impact
-    document.getElementById('coolingSlider').value = 3; // Default to 3 trees
-    const treeCount = getTreeCount();
-    buildImpactLayer(treeCount);
+    document.getElementById('coolingSlider').value = 5;
     
     if (appState.selectedHeatSpot) {
       // Plant trees in the selected heat spot only
@@ -591,8 +577,6 @@ function initUI(){
   
   // Tree count slider updates
   document.getElementById('coolingSlider').addEventListener('input',()=>{
-    const treeCount = getTreeCount();
-    buildImpactLayer(treeCount);
     if(appState.ui.mode === 'trees'){ 
       // Rebuild trees based on whether we have a selection or showing all
       if (appState.selectedHeatSpot) {
@@ -626,9 +610,6 @@ function initUI(){
   });
   
   document.getElementById('toggleTrees').addEventListener('click',()=>{
-    const treeCount = getTreeCount();
-    buildImpactLayer(treeCount);
-    
     if (appState.selectedHeatSpot) {
       // Show trees for selected area only
       buildTreeIconsLayer();
