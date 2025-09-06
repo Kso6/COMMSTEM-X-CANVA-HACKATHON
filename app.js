@@ -648,7 +648,7 @@ function buildRealHeatLayer(heatIslandData) {
       🌡️ Temperature: ${data.temp.toFixed(1)}°C<br/>
       Feels like: ${data.feels_like.toFixed(1)}°C<br/>
       Humidity: ${data.humidity}%<br/>
-      <em>Click to plant trees in this heat island</em>
+      <em>Click to select/unselect this heat island</em>
     `);
     
     // Make heat islands clickable for tree planting
@@ -662,6 +662,27 @@ function buildRealHeatLayer(heatIslandData) {
 }
 
 function selectHeatSpot(data) {
+  // Check if this heat spot is already selected (toggle functionality)
+  const isCurrentlySelected = appState.selectedHeatSpot && 
+    Math.abs(appState.selectedHeatSpot.lat - data.lat) < 0.002 && 
+    Math.abs(appState.selectedHeatSpot.lng - data.lng) < 0.002;
+  
+  if (isCurrentlySelected) {
+    // Unselect the heat spot (toggle off)
+    appState.selectedHeatSpot = null;
+    
+    // Reset all heat spots to normal appearance
+    resetHeatSpotHighlighting();
+    
+    // Reset plant trees button to default state
+    const plantButton = document.getElementById('plantTrees');
+    plantButton.textContent = '🌳 Plant Trees & See Impact';
+    plantButton.style.background = 'linear-gradient(135deg, var(--brand), #059669)';
+    
+    return; // Exit early since we're unselecting
+  }
+  
+  // Select the new heat spot
   appState.selectedHeatSpot = data;
   
   // Store the selected heat spot in treeDensities if not exists
