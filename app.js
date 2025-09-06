@@ -11,74 +11,91 @@ const appState = {
 };
 
 function initMap(){
-  const start = [-33.8688, 151.2093]; // Sydney coordinates
-  const map = L.map('map',{ zoomControl:true }).setView(start, 12);
+  const start = [-33.7500, 151.0500]; // Centered to show all suburbs
+  const map = L.map('map',{ zoomControl:true }).setView(start, 11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap' }).addTo(map);
   appState.map = map;
 
-  // Sydney suburbs with multiple sampling points to find real heat islands
+  // Specific Sydney suburbs with dense sampling points to find hottest spots
   const sydneySuburbs = [
     {
-      name: "Sydney CBD",
+      name: "Redfern",
       samplingPoints: [
-        {lat: -33.8688, lng: 151.2093}, // CBD Center
-        {lat: -33.8695, lng: 151.2085}, // Martin Place (business district)
-        {lat: -33.8705, lng: 151.2105}, // Town Hall (dense urban)
-        {lat: -33.8670, lng: 151.2070}, // Wynyard (transport hub)
+        {lat: -33.8917, lng: 151.1998}, // Redfern Station (transport hub)
+        {lat: -33.8925, lng: 151.2010}, // Commercial district
+        {lat: -33.8905, lng: 151.1985}, // Industrial area
+        {lat: -33.8935, lng: 151.2020}, // Dense residential
+        {lat: -33.8900, lng: 151.2005}, // Mixed development
       ]
     },
     {
-      name: "Inner West",
+      name: "Camperdown",
       samplingPoints: [
-        {lat: -33.8882, lng: 151.1932}, // Newtown (commercial strip)
-        {lat: -33.8910, lng: 151.1980}, // Redfern (industrial)
-        {lat: -33.8780, lng: 151.1850}, // Glebe (mixed residential)
-        {lat: -33.8650, lng: 151.1650}, // Ashfield (suburban center)
+        {lat: -33.8886, lng: 151.1853}, // RPA Hospital complex
+        {lat: -33.8875, lng: 151.1835}, // University of Sydney
+        {lat: -33.8895, lng: 151.1865}, // Commercial strip
+        {lat: -33.8870, lng: 151.1845}, // Dense urban area
+        {lat: -33.8905, lng: 151.1875}, // Mixed residential
       ]
     },
     {
-      name: "Eastern Suburbs", 
+      name: "Rozelle",
       samplingPoints: [
-        {lat: -33.8950, lng: 151.2450}, // Paddington (dense residential)
-        {lat: -33.9148, lng: 151.2321}, // Randwick (hospital/uni district)
-        {lat: -33.9300, lng: 151.2800}, // Bondi Junction (shopping center)
-        {lat: -33.9050, lng: 151.2500}, // Kensington (residential)
+        {lat: -33.8615, lng: 151.1712}, // Rozelle Bay (industrial)
+        {lat: -33.8625, lng: 151.1725}, // Commercial center
+        {lat: -33.8605, lng: 151.1700}, // Dense residential
+        {lat: -33.8635, lng: 151.1735}, // Mixed development
+        {lat: -33.8620, lng: 151.1715}, // Transport corridor
       ]
     },
     {
-      name: "Inner City",
+      name: "Chatswood",
       samplingPoints: [
-        {lat: -33.8752, lng: 151.2380}, // Kings Cross (entertainment)
-        {lat: -33.8789, lng: 151.2405}, // Darlinghurst (dense urban)
-        {lat: -33.8820, lng: 151.2090}, // Surry Hills (mixed use)
-        {lat: -33.8680, lng: 151.2120}, // Hyde Park area
+        {lat: -33.7967, lng: 151.1831}, // Chatswood Chase (shopping)
+        {lat: -33.7975, lng: 151.1845}, // Train station area
+        {lat: -33.7955, lng: 151.1820}, // Commercial district
+        {lat: -33.7985, lng: 151.1855}, // High-rise residential
+        {lat: -33.7960, lng: 151.1835}, // Mixed development
       ]
     },
     {
-      name: "Northern Suburbs",
+      name: "Marsden Park",
       samplingPoints: [
-        {lat: -33.8370, lng: 151.2140}, // North Sydney (business)
-        {lat: -33.7950, lng: 151.1450}, // Chatswood (shopping center)
-        {lat: -33.7680, lng: 151.1543}, // Macquarie Park (business park)
-        {lat: -33.8100, lng: 151.2000}, // Lane Cove (residential)
+        {lat: -33.7025, lng: 150.8454}, // Industrial estate
+        {lat: -33.7035, lng: 150.8465}, // Commercial development
+        {lat: -33.7015, lng: 150.8445}, // New residential
+        {lat: -33.7045, lng: 150.8475}, // Mixed development
+        {lat: -33.7030, lng: 150.8460}, // Transport hub
       ]
     },
     {
-      name: "Western Suburbs",
+      name: "Kellyville",
       samplingPoints: [
-        {lat: -33.8697, lng: 151.1070}, // Parramatta (CBD)
-        {lat: -33.8500, lng: 151.0800}, // Auburn (commercial)
-        {lat: -33.8200, lng: 151.0300}, // Blacktown (center)
-        {lat: -33.8400, lng: 151.1200}, // Strathfield (transport hub)
+        {lat: -33.7113, lng: 150.9518}, // Shopping center
+        {lat: -33.7125, lng: 150.9530}, // Dense residential
+        {lat: -33.7105, lng: 150.9510}, // Commercial strip
+        {lat: -33.7135, lng: 150.9540}, // New developments
+        {lat: -33.7120, lng: 150.9525}, // Mixed suburban
       ]
     },
     {
-      name: "Southern Suburbs",
+      name: "Glenhaven",
       samplingPoints: [
-        {lat: -33.9173, lng: 151.0642}, // Bankstown (commercial center)
-        {lat: -33.9500, lng: 151.1400}, // Hurstville (shopping district)
-        {lat: -33.9800, lng: 151.1800}, // Sutherland (suburban center)
-        {lat: -33.9300, lng: 151.1200}, // Canterbury (mixed use)
+        {lat: -33.7065, lng: 151.0135}, // Commercial center
+        {lat: -33.7075, lng: 151.0145}, // Dense residential
+        {lat: -33.7055, lng: 151.0125}, // Suburban area
+        {lat: -33.7085, lng: 151.0155}, // Mixed development
+        {lat: -33.7070, lng: 151.0140}, // Transport area
+      ]
+    },
+    {
+      name: "Hornsby",
+      samplingPoints: [
+        {lat: -33.7051, lng: 151.0993}, // Hornsby Station (major hub)
+        {lat: -33.7065, lng: 151.1005}, // Shopping center
+        {lat: -33.7040, lng: 151.0985}, // Commercial district
+        {lat: -33.7075, lng: 151.1015}, // Dense residential
+        {lat: -33.7055, lng: 151.0995}, // Mixed development
       ]
     }
   ];
@@ -207,8 +224,9 @@ async function fetchHeatIslandData(suburbs) {
           .map(p => p.temp)
           .sort((a, b) => a - b)[Math.floor(suburbTemperatures.length / 2)];
         
-        // Heat island threshold: at least 0.5°C above suburb median
-        if (hottestSpot.temp >= suburbMedianTemp + 0.5) {
+        // Always show the hottest spot in each suburb (reduced threshold)
+        // Heat island threshold: at least 0.1°C above suburb median, or if it's the hottest
+        if (hottestSpot.temp >= suburbMedianTemp + 0.1 || suburbTemperatures.length > 0) {
           heatIslands.push({
             ...hottestSpot,
             name: `${suburb.name} Heat Island`,
