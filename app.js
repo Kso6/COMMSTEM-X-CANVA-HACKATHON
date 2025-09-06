@@ -55,6 +55,14 @@ function initMap(){
     clearTimeout(weatherTimer);
     weatherTimer = setTimeout(fetchWeatherForCenter, 250);
   });
+
+  document.getElementById('locateMe')?.addEventListener('click', ()=>{
+    if(!navigator.geolocation){ return alert('Geolocation not available'); }
+    navigator.geolocation.getCurrentPosition((pos)=>{
+      const { latitude, longitude } = pos.coords;
+      appState.map.setView([latitude, longitude], 13);
+    }, ()=> alert('Unable to access location'));
+  });
 }
 
 function tempColor(t){
@@ -127,11 +135,38 @@ async function fetchWeatherForCenter(){
     const data = await res.json();
     appState.weather = { lastCenter: {lat,lon}, data };
     renderWeather();
+
+    // Also fetch simple forecast (every 3 hours) and AQI
+    fetchForecast(lat, lon, key);
+    fetchAQI(lat, lon, key);
   }catch(err){
     // optional: show minimal error state
     const el = document.getElementById('wUpdated');
     if(el) el.textContent = 'Weather unavailable';
   }
+}
+
+async function fetchForecast(lat, lon, key){
+  try{
+    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${key}&units=metric`;
+    const res = await fetch(url); if(!res.ok) throw new Error('forecast http '+res.status);
+    const data = await res.json();
+    const items = (data.list||[]).slice(0,5).map(x=>({
+      time: new Date(x.dt*1000), temp: Math.round(x.main?.temp ?? 0), icon: x.weather?.[0]?.icon
+    }));
+    renderForecast(items);
+  }catch(e){ /* ignore */ }
+}
+
+async function fetchAQI(lat, lon, key){
+  try{
+    const url = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${key}`;
+    const res = await fetch(url); if(!res.ok) throw new Error('aqi http '+res.status);
+    const data = await res.json();
+    const aqi = data.list?.[0]?.main?.aqi || 0; // 1..5
+    const label = ['—','Good','Fair','Moderate','Poor','Very Poor'][aqi] || '—';
+    setText('wAQI', `AQI ${aqi} (${label})`);
+  }catch(e){ /* ignore */ }
 }
 
 function renderWeather(){
@@ -151,10 +186,26 @@ function renderWeather(){
   setText('wWind', `${wind} m/s wind`);
   setText('wCond', capitalize(cond));
   setText('wUpdated', `Updated ${fmt}`);
+  const icon = d.weather?.[0]?.icon; // e.g. 10d
+  const iconUrl = icon ? `https://openweathermap.org/img/wn/${icon}.png` : '';
+  const img = document.getElementById('wIcon'); if(img) { img.src = iconUrl; img.classList.remove('skeleton'); }
+  ['wCity','wTemp','wFeels','wHum','wWind','wCond'].forEach(id=>document.getElementById(id)?.classList.remove('skeleton'));
 }
 
 function setText(id, text){ const el=document.getElementById(id); if(el) el.textContent=text; }
 function capitalize(s){ return s? s.charAt(0).toUpperCase()+s.slice(1): s; }
+
+function renderForecast(items){
+  const wrap = document.getElementById('wForecast'); if(!wrap) return;
+  wrap.innerHTML = '';
+  items.forEach(it=>{
+    const t = it.time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const el = document.createElement('div');
+    el.className = 'chip';
+    el.innerHTML = `${t} <span class="small">${it.temp}°C</span>`;
+    wrap.appendChild(el);
+  });
+}
 
 function enableTreePainting(){
   let isMouseDown = false;

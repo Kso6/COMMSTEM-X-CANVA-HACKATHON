@@ -49,24 +49,28 @@
         <h2>Weather now</h2>
         <div id="weatherSummary" class="weather-summary">
           <div class="w-row">
-            <div class="w-main"><span id="wCity">—</span></div>
-            <div class="w-temp"><span id="wTemp">—</span>°C</div>
+            <div class="w-main"><span id="wCity" class="skeleton">Loading…</span></div>
+            <div class="w-temp"><img id="wIcon" alt="" class="w-icon skeleton"/><span id="wTemp" class="skeleton">—</span>°C</div>
           </div>
           <div class="w-meta">
-            <span id="wCond">—</span>
+            <span id="wCond" class="skeleton">—</span>
             <span>•</span>
-            <span id="wFeels">feels like —°C</span>
+            <span id="wFeels" class="skeleton">feels like —°C</span>
             <span>•</span>
-            <span id="wHum">—% humidity</span>
+            <span id="wHum" class="skeleton">—% humidity</span>
             <span>•</span>
-            <span id="wWind">— m/s wind</span>
+            <span id="wWind" class="skeleton">— m/s wind</span>
+            <span>•</span>
+            <span id="wAQI" class="skeleton">AQI —</span>
           </div>
+          <div class="w-forecast" id="wForecast"></div>
           <div class="w-updated" id="wUpdated">Updated —</div>
         </div>
       </div>
     </section>
     <section class="map-panel">
       <div id="map"></div>
+      <button id="locateMe" class="fab" title="Use my location">📍</button>
       <div id="legend" class="legend">
         <div class="legend-title">Surface temperature (°C)</div>
         <div class="scale">
