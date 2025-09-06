@@ -64,8 +64,8 @@ function initMap(){
   // Tree icons layer (build but don't add to map yet)
   buildTreeIconsLayer();
 
-  // Simple impact overlay based on slider
-  buildImpactLayer(getCoolingPercent());
+  // Simple impact overlay based on initial tree count
+  buildImpactLayer(getTreeCount());
 
   // Fetch weather initially and on move end (debounced)
   fetchWeatherForCenter();
@@ -92,16 +92,19 @@ function tempColor(t){
   return '#2c7bb6';
 }
 
-function getCoolingPercent(){
-  const v = Number(document.getElementById('coolingSlider').value||'10');
+function getTreeCount(){
+  const v = Number(document.getElementById('coolingSlider').value||'3');
   return v;
 }
 
-function buildImpactLayer(percent){
+function buildImpactLayer(numTrees){
   if(appState.layers.impact){ appState.layers.impact.remove(); }
-  const factor = 1.5 * (percent/10); // degC drop in hotspots per +10% canopy
+  // Oak tree cooling effect: ~0.8°C per tree in immediate vicinity
+  const coolingPerTree = 0.8;
+  const totalCooling = Math.min(5.0, numTrees * coolingPerTree); // Cap at 5°C max
+  
   const rectangles = appState.points.map(([lat,lng,temp])=>{
-    const cooled = Math.max(20, temp - factor);
+    const cooled = Math.max(20, temp - totalCooling);
     const color = tempColor(cooled);
     // Create impact area as rectangle representing building blocks
     const offsetLat = 0.004; // larger impact area
@@ -116,7 +119,7 @@ function buildImpactLayer(percent){
       fillOpacity: 0.3, 
       weight: 1,
       stroke: true
-    }).bindTooltip(`Impact: -${(temp-cooled).toFixed(1)}°C`);
+    }).bindTooltip(`Impact: -${totalCooling.toFixed(1)}°C from ${numTrees} oak trees`);
   });
   appState.layers.impact = L.layerGroup(rectangles);
 }
@@ -279,29 +282,23 @@ function buildTreeIconsLayer(){
   
   const treeMarkers = [];
   
-  // Only show trees if there's a selected heat spot or if we're showing all
+  // Only show trees if there's a selected heat spot
   const spotsToProcess = appState.selectedHeatSpot ? 
     [[appState.selectedHeatSpot.lat, appState.selectedHeatSpot.lng, appState.selectedHeatSpot.temp]] : 
     []; // Don't show any trees if no heat spot is selected
   
   spotsToProcess.forEach(([lat, lng, temp], index) => {
     const spotKey = `${lat}_${lng}`;
-    // Initialize with 3 trees if not set
-    if (!appState.treeDensities[spotKey]) {
-      appState.treeDensities[spotKey] = 3;
-    }
+    // Use slider value directly as number of trees
+    const numTrees = getTreeCount();
     
-    const density = appState.treeDensities[spotKey];
-    const coverage = getCoolingPercent();
-    const adjustedDensity = Math.max(1, Math.round(density * (coverage / 10)));
-    
-    // Create multiple trees in a small cluster for each heat spot
-    for (let i = 0; i < adjustedDensity; i++) {
-      const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset
+    // Create trees in a small cluster for the heat spot
+    for (let i = 0; i < numTrees; i++) {
+      const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset within ~100m
       const offsetLng = (Math.random() - 0.5) * 0.001;
       
-      // Size based on coverage level
-      const size = Math.min(40, 20 + (coverage * 0.8));
+      // Consistent size for mature oak trees (30px = ~15m canopy diameter)
+      const size = 30;
       
       const treeIcon = L.icon({
         iconUrl: 'Tree art.png',
@@ -326,23 +323,16 @@ function buildTreeIconsLayerForAll(){
   
   // Show trees for all heat spots
   appState.points.forEach(([lat, lng, temp], index) => {
-    const spotKey = `${lat}_${lng}`;
-    // Initialize with 3 trees if not set
-    if (!appState.treeDensities[spotKey]) {
-      appState.treeDensities[spotKey] = 3;
-    }
+    // Use slider value directly as number of trees for each area
+    const numTrees = getTreeCount();
     
-    const density = appState.treeDensities[spotKey];
-    const coverage = getCoolingPercent();
-    const adjustedDensity = Math.max(1, Math.round(density * (coverage / 10)));
-    
-    // Create multiple trees in a small cluster for each heat spot
-    for (let i = 0; i < adjustedDensity; i++) {
-      const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset
+    // Create trees in a small cluster for each heat spot
+    for (let i = 0; i < numTrees; i++) {
+      const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset within ~100m
       const offsetLng = (Math.random() - 0.5) * 0.001;
       
-      // Size based on coverage level
-      const size = Math.min(40, 20 + (coverage * 0.8));
+      // Consistent size for mature oak trees (30px = ~15m canopy diameter)
+      const size = 30;
       
       const treeIcon = L.icon({
         iconUrl: 'Tree art.png',
@@ -421,29 +411,37 @@ function resetHeatSpotHighlighting() {
 }
 
 function updateCoolingImpactDisplay() {
-  const coverage = getCoolingPercent();
+  const numTrees = getTreeCount();
   
-  // Calculate for selected area only if available, otherwise calculate for all
+  // Calculate accurate metrics based on actual oak tree characteristics
   let totalTrees = 0;
+  let areaM2 = 0; // Total area being analyzed in square meters
+  
   if (appState.selectedHeatSpot) {
-    const spotKey = `${appState.selectedHeatSpot.lat}_${appState.selectedHeatSpot.lng}`;
-    const density = appState.treeDensities[spotKey] || 3;
-    totalTrees = Math.max(1, Math.round(density * (coverage / 10)));
+    // Single selected area
+    totalTrees = numTrees;
+    areaM2 = 400 * 600; // ~240,000 m² (approximate size of our heat rectangles)
   } else {
-    // Calculate for all heat spots
-    appState.points.forEach(([lat, lng]) => {
-      const spotKey = `${lat}_${lng}`;
-      const density = appState.treeDensities[spotKey] || 3;
-      totalTrees += Math.max(1, Math.round(density * (coverage / 10)));
-    });
+    // All heat spots
+    totalTrees = numTrees * appState.points.length;
+    areaM2 = 400 * 600 * appState.points.length; // Total area of all rectangles
   }
   
-  const tempReduction = (coverage * 0.15).toFixed(1); // 1.5°C per 10% coverage
-  const areaCoverage = Math.min(100, coverage * 3).toFixed(0); // Approximate area coverage
+  // Oak tree calculations based on research:
+  // - Mature oak canopy diameter: ~15m (176 m² coverage per tree)
+  // - Cooling effect: ~0.8-1.2°C per tree in immediate vicinity
+  // - Coverage percentage: (trees * canopy area) / total area * 100
+  
+  const canopyAreaPerTree = 176; // m² per mature oak tree
+  const totalCanopyArea = totalTrees * canopyAreaPerTree;
+  const areaCoveragePercent = Math.min(100, (totalCanopyArea / areaM2) * 100);
+  
+  // Temperature reduction: 0.8°C per tree in local area, diminishing with distance
+  const tempReduction = Math.min(5.0, totalTrees * 0.8).toFixed(1);
   
   document.getElementById('tempReduction').textContent = `-${tempReduction}°C`;
   document.getElementById('treesPlanted').textContent = `${totalTrees} trees`;
-  document.getElementById('areaCoverage').textContent = `${areaCoverage}%`;
+  document.getElementById('areaCoverage').textContent = `${areaCoveragePercent.toFixed(1)}%`;
 }
 
 // Removed unused reading functionality to simplify the app
@@ -569,8 +567,8 @@ function initUI(){
     }
     
     // Otherwise, plant trees and show impact
-    document.getElementById('coolingSlider').value = 20;
-    buildImpactLayer(getCoolingPercent());
+    document.getElementById('coolingSlider').value = 10; // Default to 10 trees
+    buildImpactLayer(getTreeCount());
     
     if (appState.selectedHeatSpot) {
       // Plant trees in the selected heat spot only
@@ -590,9 +588,8 @@ function initUI(){
     document.getElementById('plantTrees').style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
   });
   
-  // Cooling slider updates
+  // Tree count slider updates (each step = 1 tree)
   document.getElementById('coolingSlider').addEventListener('input',()=>{
-    buildImpactLayer(getCoolingPercent());
     if(appState.ui.mode === 'trees'){ 
       // Rebuild trees based on whether we have a selection or showing all
       if (appState.selectedHeatSpot) {
