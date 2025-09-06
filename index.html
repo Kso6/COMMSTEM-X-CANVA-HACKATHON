@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canopy — Cool Cities, Naturally</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo">🌿</div>
+      <div class="title">Canopy</div>
+    </div>
+    <nav class="header-actions">
+      <button id="openOnboarding" class="btn primary">How it works</button>
+      <a id="githubLink" class="btn ghost" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+  <main class="layout">
+    <section class="left-panel">
+      <div class="card hero">
+        <h1>Cool cities, powered by nature</h1>
+        <p>Identify urban heat, simulate tree planting, and share community readings. No signups. No fees.</p>
+        <div class="cta-row">
+          <button id="plantTrees" class="btn success">Plant 100 trees</button>
+          <button id="addReading" class="btn">Add my reading</button>
+        </div>
+      </div>
+      <div class="card controls">
+        <h2>Scenario</h2>
+        <div class="control">
+          <label for="coolingSlider">Tree canopy increase</label>
+          <input type="range" id="coolingSlider" min="0" max="30" value="10"/>
+          <div class="hint">Approx. −1.5°C per +10% canopy in hotspots</div>
+        </div>
+        <div class="control grid">
+          <button id="toggleHeat" class="btn toggle active">Heat map</button>
+          <button id="toggleImpact" class="btn toggle">Impact</button>
+          <button id="toggleTrees" class="btn toggle">Trees</button>
+          <button id="toggleReadings" class="btn toggle">Community</button>
+        </div>
+      </div>
+      <div class="card insights">
+        <h2>Insights</h2>
+        <ul id="insightsList" class="insights-list"></ul>
+      </div>
+    </section>
+    <section class="map-panel">
+      <div id="map"></div>
+      <div id="legend" class="legend">
+        <div class="legend-title">Surface temperature (°C)</div>
+        <div class="scale">
+          <span style="--c:#2c7bb6">20</span>
+          <span style="--c:#abd9e9">25</span>
+          <span style="--c:#ffffbf">30</span>
+          <span style="--c:#fdae61">35</span>
+          <span style="--c:#d7191c">40+</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Onboarding Modal -->
+  <dialog id="onboarding" class="modal">
+    <form method="dialog" class="modal-card">
+      <header>
+        <h3>How it works</h3>
+        <button class="icon-btn" value="cancel">×</button>
+      </header>
+      <section class="content">
+        <ol class="steps">
+          <li><strong>Heat</strong>: We approximate hotspots from open map context.</li>
+          <li><strong>Plant</strong>: Drag to add trees. Slider simulates canopy increase.</li>
+          <li><strong>Impact</strong>: See estimated cooling and households helped.</li>
+          <li><strong>Share</strong>: Add your street-level reading and pin it.</li>
+        </ol>
+        <p class="fine">This is a no-backend prototype. Your data stays in your browser.</p>
+      </section>
+      <footer>
+        <button class="btn primary" value="cancel">Got it</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Add Reading Modal -->
+  <dialog id="readingModal" class="modal">
+    <form method="dialog" class="modal-card" id="readingForm">
+      <header>
+        <h3>Add a reading</h3>
+        <button class="icon-btn" value="cancel">×</button>
+      </header>
+      <section class="content form">
+        <label>Temperature (°C) <input required type="number" step="0.1" id="readingTemp" placeholder="e.g. 34.6" /></label>
+        <label>Notes <input type="text" id="readingNotes" placeholder="Near bus stop, no trees"/></label>
+        <div class="hint">Click the map to place your reading pin.</div>
+      </section>
+      <footer>
+        <button class="btn" value="cancel">Cancel</button>
+        <button class="btn success" id="saveReading">Save</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
