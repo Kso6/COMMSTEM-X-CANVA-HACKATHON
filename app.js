@@ -16,49 +16,79 @@ function initMap(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap' }).addTo(map);
   appState.map = map;
 
-  // Key Sydney land-based locations for real temperature data (no water areas)
-  const sydneyLocations = [
-    // Sydney CBD and Inner City (land-based only)
-    {lat: -33.8688, lng: 151.2093, name: "Sydney CBD"},
-    {lat: -33.8695, lng: 151.2085, name: "Martin Place"},
-    {lat: -33.8705, lng: 151.2105, name: "Town Hall"},
-    {lat: -33.8680, lng: 151.2120, name: "Hyde Park"},
-    {lat: -33.8752, lng: 151.2380, name: "Kings Cross"},
-    {lat: -33.8789, lng: 151.2405, name: "Darlinghurst"},
-    {lat: -33.8820, lng: 151.2090, name: "Surry Hills"},
-    {lat: -33.8882, lng: 151.1932, name: "Newtown"},
-    {lat: -33.8910, lng: 151.1980, name: "Redfern"},
-    {lat: -33.8780, lng: 151.1850, name: "Glebe"},
-    
-    // Northern Suburbs (inland areas)
-    {lat: -33.8370, lng: 151.2140, name: "North Sydney"},
-    {lat: -33.7680, lng: 151.1543, name: "Macquarie Park"},
-    {lat: -33.7950, lng: 151.1450, name: "Chatswood"},
-    
-    // Eastern Suburbs (away from water)
-    {lat: -33.8950, lng: 151.2450, name: "Paddington"},
-    {lat: -33.9148, lng: 151.2321, name: "Randwick"},
-    {lat: -33.9300, lng: 151.2800, name: "Bondi Junction"},
-    {lat: -33.9050, lng: 151.2500, name: "Kensington"},
-    
-    // Western Suburbs 
-    {lat: -33.8697, lng: 151.1070, name: "Parramatta"},
-    {lat: -33.8500, lng: 151.0800, name: "Auburn"},
-    {lat: -33.8200, lng: 151.0300, name: "Blacktown"},
-    {lat: -33.8650, lng: 151.1650, name: "Ashfield"},
-    
-    // Southern Suburbs
-    {lat: -33.9173, lng: 151.0642, name: "Bankstown"},
-    {lat: -33.9500, lng: 151.1400, name: "Hurstville"},
-    {lat: -33.9800, lng: 151.1800, name: "Sutherland"},
+  // Sydney suburbs with multiple sampling points to find real heat islands
+  const sydneySuburbs = [
+    {
+      name: "Sydney CBD",
+      samplingPoints: [
+        {lat: -33.8688, lng: 151.2093}, // CBD Center
+        {lat: -33.8695, lng: 151.2085}, // Martin Place (business district)
+        {lat: -33.8705, lng: 151.2105}, // Town Hall (dense urban)
+        {lat: -33.8670, lng: 151.2070}, // Wynyard (transport hub)
+      ]
+    },
+    {
+      name: "Inner West",
+      samplingPoints: [
+        {lat: -33.8882, lng: 151.1932}, // Newtown (commercial strip)
+        {lat: -33.8910, lng: 151.1980}, // Redfern (industrial)
+        {lat: -33.8780, lng: 151.1850}, // Glebe (mixed residential)
+        {lat: -33.8650, lng: 151.1650}, // Ashfield (suburban center)
+      ]
+    },
+    {
+      name: "Eastern Suburbs", 
+      samplingPoints: [
+        {lat: -33.8950, lng: 151.2450}, // Paddington (dense residential)
+        {lat: -33.9148, lng: 151.2321}, // Randwick (hospital/uni district)
+        {lat: -33.9300, lng: 151.2800}, // Bondi Junction (shopping center)
+        {lat: -33.9050, lng: 151.2500}, // Kensington (residential)
+      ]
+    },
+    {
+      name: "Inner City",
+      samplingPoints: [
+        {lat: -33.8752, lng: 151.2380}, // Kings Cross (entertainment)
+        {lat: -33.8789, lng: 151.2405}, // Darlinghurst (dense urban)
+        {lat: -33.8820, lng: 151.2090}, // Surry Hills (mixed use)
+        {lat: -33.8680, lng: 151.2120}, // Hyde Park area
+      ]
+    },
+    {
+      name: "Northern Suburbs",
+      samplingPoints: [
+        {lat: -33.8370, lng: 151.2140}, // North Sydney (business)
+        {lat: -33.7950, lng: 151.1450}, // Chatswood (shopping center)
+        {lat: -33.7680, lng: 151.1543}, // Macquarie Park (business park)
+        {lat: -33.8100, lng: 151.2000}, // Lane Cove (residential)
+      ]
+    },
+    {
+      name: "Western Suburbs",
+      samplingPoints: [
+        {lat: -33.8697, lng: 151.1070}, // Parramatta (CBD)
+        {lat: -33.8500, lng: 151.0800}, // Auburn (commercial)
+        {lat: -33.8200, lng: 151.0300}, // Blacktown (center)
+        {lat: -33.8400, lng: 151.1200}, // Strathfield (transport hub)
+      ]
+    },
+    {
+      name: "Southern Suburbs",
+      samplingPoints: [
+        {lat: -33.9173, lng: 151.0642}, // Bankstown (commercial center)
+        {lat: -33.9500, lng: 151.1400}, // Hurstville (shopping district)
+        {lat: -33.9800, lng: 151.1800}, // Sutherland (suburban center)
+        {lat: -33.9300, lng: 151.1200}, // Canterbury (mixed use)
+      ]
+    }
   ];
 
   // Initialize empty layers
   appState.layers.heat = L.layerGroup();
   appState.layers.heat.addTo(map);
 
-  // Fetch real temperature data for all locations
-  fetchRealHeatmapData(sydneyLocations);
+  // Fetch real temperature data and identify heat islands per suburb
+  fetchHeatIslandData(sydneySuburbs);
 
   // Trees layer (user paint) - don't add by default
   // Tree icons layer (build but don't add to map yet)
@@ -124,7 +154,99 @@ function buildImpactLayer(numTrees){
   appState.layers.impact = L.layerGroup(rectangles);
 }
 
-// Fetch real temperature data from OpenWeather API
+// Fetch temperature data for all sampling points and identify heat islands per suburb
+async function fetchHeatIslandData(suburbs) {
+  const key = 'acce1388ea5659880c18e478e553acec';
+  const heatIslands = [];
+  
+  try {
+    // Show loading overlay
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+      loadingOverlay.style.display = 'flex';
+    }
+    
+    // Process each suburb to find its hottest spot
+    for (let suburb of suburbs) {
+      const suburbTemperatures = [];
+      
+      // Sample all points in this suburb
+      for (let point of suburb.samplingPoints) {
+        try {
+          const url = `https://api.openweathermap.org/data/2.5/weather?lat=${point.lat}&lon=${point.lng}&appid=${key}&units=metric`;
+          const response = await fetch(url);
+          
+          if (response.ok) {
+            const data = await response.json();
+            const temp = data.main?.temp || 20;
+            suburbTemperatures.push({
+              lat: point.lat,
+              lng: point.lng,
+              temp: temp,
+              feels_like: data.main?.feels_like || temp,
+              humidity: data.main?.humidity || 50,
+              suburb: suburb.name
+            });
+          }
+          
+          // Rate limit: wait 100ms between requests
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+          console.log(`Failed to fetch data for ${suburb.name} point:`, error);
+        }
+      }
+      
+      // Find the hottest spot in this suburb (heat island)
+      if (suburbTemperatures.length > 0) {
+        const hottestSpot = suburbTemperatures.reduce((hottest, current) => 
+          current.temp > hottest.temp ? current : hottest
+        );
+        
+        // Only include if it's significantly hot (above median + threshold)
+        const suburbMedianTemp = suburbTemperatures
+          .map(p => p.temp)
+          .sort((a, b) => a - b)[Math.floor(suburbTemperatures.length / 2)];
+        
+        // Heat island threshold: at least 0.5°C above suburb median
+        if (hottestSpot.temp >= suburbMedianTemp + 0.5) {
+          heatIslands.push({
+            ...hottestSpot,
+            name: `${suburb.name} Heat Island`,
+            tempDifference: (hottestSpot.temp - suburbMedianTemp).toFixed(1)
+          });
+        }
+      }
+    }
+    
+    // Store the heat island data
+    appState.points = heatIslands.map(h => [h.lat, h.lng, h.temp]);
+    
+    // Build heat layer with real heat island data
+    buildRealHeatLayer(heatIslands);
+    
+    // Build impact and tree layers
+    buildImpactLayer(getTreeCount());
+    buildTreeIconsLayer();
+    
+    // Hide loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+    
+    console.log(`Found ${heatIslands.length} real heat islands across Sydney suburbs`);
+    
+  } catch (error) {
+    console.error('Error fetching heat island data:', error);
+    // Hide loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+  }
+}
+
+// Legacy function - keeping for compatibility
 async function fetchRealHeatmapData(locations) {
   const key = 'acce1388ea5659880c18e478e553acec';
   const temperatureData = [];
@@ -211,14 +333,14 @@ async function fetchRealHeatmapData(locations) {
   }
 }
 
-function buildRealHeatLayer(temperatureData) {
+function buildRealHeatLayer(heatIslandData) {
   appState.layers.heat.clearLayers();
   
-  temperatureData.forEach(data => {
+  heatIslandData.forEach(data => {
     const c = tempColor(data.temp);
-    // Create a small rectangular area around the point to represent a building block
-    const offsetLat = 0.002; // roughly 200m
-    const offsetLng = 0.003; // roughly 200m  
+    // Create a larger rectangular area to represent the heat island zone
+    const offsetLat = 0.003; // roughly 300m - larger for heat islands
+    const offsetLng = 0.004; // roughly 400m  
     const bounds = [
       [data.lat - offsetLat, data.lng - offsetLng],
       [data.lat + offsetLat, data.lng + offsetLng]
@@ -227,19 +349,20 @@ function buildRealHeatLayer(temperatureData) {
     const rectangle = L.rectangle(bounds, { 
       color: c, 
       fillColor: c, 
-      fillOpacity: 0.6, 
-      weight: 2,
+      fillOpacity: 0.7, // More prominent for heat islands
+      weight: 3,
       stroke: true,
       className: 'heat-spot-clickable'
     }).bindTooltip(`
       <strong>${data.name}</strong><br/>
-      Temperature: ${data.temp.toFixed(1)}°C<br/>
+      🌡️ Temperature: ${data.temp.toFixed(1)}°C<br/>
+      🔥 ${data.tempDifference}°C above suburb average<br/>
       Feels like: ${data.feels_like.toFixed(1)}°C<br/>
       Humidity: ${data.humidity}%<br/>
-      <em>Click to select for tree planting</em>
+      <em>Click to plant trees in this heat island</em>
     `);
     
-    // Make heat spots clickable for selection
+    // Make heat islands clickable for tree planting
     rectangle.on('click', function(e) {
       selectHeatSpot(data);
       L.DomEvent.stopPropagation(e);
