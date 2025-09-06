@@ -1,9 +1,8 @@
 // app.js
 const appState = {
   map: null,
-  layers: { heat: null, impact: null, trees: L.layerGroup(), readings: L.layerGroup() },
+  layers: { heat: null, impact: null, trees: L.layerGroup(), treeIcons: L.layerGroup() },
   points: [],
-  readings: JSON.parse(localStorage.getItem('canopy_readings')||'[]'),
   treePolygons: [],
   ui: { mode: 'heat' },
   weather: { lastCenter: null, data: null }
@@ -15,42 +14,55 @@ function initMap(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap' }).addTo(map);
   appState.map = map;
 
-  // Sample synthetic heat points (Sydney)
-  const hotspots = [
-    // Sydney hotspots
-    [-33.8688, 151.2093, 36], // Sydney CBD
-    [-33.8882, 151.1932, 38], // Newtown
-    [-33.8568, 151.2153, 35], // The Rocks
-    [-33.8752, 151.2380, 37], // Kings Cross
-    [-33.9148, 151.2321, 39], // Randwick
-    [-33.8697, 151.1070, 38], // Parramatta
-    [-33.7680, 151.1543, 37], // Macquarie Park
-    [-33.9173, 151.0642, 36]  // Bankstown
+  // Key Sydney locations for real temperature data
+  const sydneyLocations = [
+    // Sydney CBD and Inner City
+    {lat: -33.8688, lng: 151.2093, name: "Sydney CBD"},
+    {lat: -33.8695, lng: 151.2085, name: "Martin Place"},
+    {lat: -33.8705, lng: 151.2105, name: "Town Hall"},
+    {lat: -33.8680, lng: 151.2120, name: "Hyde Park"},
+    {lat: -33.8568, lng: 151.2153, name: "The Rocks"},
+    {lat: -33.8590, lng: 151.2110, name: "Circular Quay"},
+    {lat: -33.8752, lng: 151.2380, name: "Kings Cross"},
+    {lat: -33.8789, lng: 151.2405, name: "Darlinghurst"},
+    {lat: -33.8820, lng: 151.2090, name: "Surry Hills"},
+    {lat: -33.8882, lng: 151.1932, name: "Newtown"},
+    {lat: -33.8910, lng: 151.1980, name: "Redfern"},
+    {lat: -33.8780, lng: 151.1850, name: "Glebe"},
+    
+    // Northern Suburbs
+    {lat: -33.8370, lng: 151.2140, name: "North Sydney"},
+    {lat: -33.8280, lng: 151.2200, name: "Kirribilli"},
+    {lat: -33.8200, lng: 151.2300, name: "Neutral Bay"},
+    {lat: -33.7680, lng: 151.1543, name: "Macquarie Park"},
+    
+    // Eastern Suburbs
+    {lat: -33.8950, lng: 151.2450, name: "Paddington"},
+    {lat: -33.9148, lng: 151.2321, name: "Randwick"},
+    {lat: -33.9300, lng: 151.2800, name: "Bondi Junction"},
+    {lat: -33.8920, lng: 151.2770, name: "Bondi Beach"},
+    
+    // Western Suburbs
+    {lat: -33.8697, lng: 151.1070, name: "Parramatta"},
+    {lat: -33.8500, lng: 151.0800, name: "Auburn"},
+    {lat: -33.8200, lng: 151.0300, name: "Blacktown"},
+    
+    // Southern Suburbs
+    {lat: -33.9173, lng: 151.0642, name: "Bankstown"},
+    {lat: -33.9500, lng: 151.1400, name: "Hurstville"},
+    {lat: -33.9800, lng: 151.1800, name: "Sutherland"},
   ];
-  appState.points = hotspots;
 
-  // Render as circle markers for now (no heat plugin). Color by temp
-  appState.layers.heat = L.layerGroup(hotspots.map(([lat,lng,temp])=>{
-    const c = tempColor(temp);
-    return L.circleMarker([lat,lng],{ radius:14, color:c, fillColor:c, fillOpacity:.55, weight:2 }).bindTooltip(`${temp.toFixed(1)}°C`);
-  }));
+  // Initialize empty layers
+  appState.layers.heat = L.layerGroup();
   appState.layers.heat.addTo(map);
+  
+  // Fetch real temperature data for all locations
+  fetchRealHeatmapData(sydneyLocations);
 
-  // Trees layer (user paint)
-  appState.layers.trees.addTo(map);
-
-  // Readings layer
-  appState.layers.readings.addTo(map);
-  renderReadings();
-
-  // Handle click for placing reading when modal open
-  map.on('click', (e)=>{
-    if(document.getElementById('readingModal').open){
-      const m = L.marker(e.latlng,{opacity:.7});
-      m.addTo(map).bindTooltip('Position selected',{permanent:false});
-      m._isTemp = true;
-    }
-  });
+  // Trees layer (user paint) - don't add by default
+  // Tree icons layer (build but don't add to map yet)
+  buildTreeIconsLayer();
 
   // Simple impact overlay based on slider
   buildImpactLayer(getCoolingPercent());
@@ -88,45 +100,181 @@ function getCoolingPercent(){
 function buildImpactLayer(percent){
   if(appState.layers.impact){ appState.layers.impact.remove(); }
   const factor = 1.5 * (percent/10); // degC drop in hotspots per +10% canopy
-  const circles = appState.points.map(([lat,lng,temp])=>{
+  const rectangles = appState.points.map(([lat,lng,temp])=>{
     const cooled = Math.max(20, temp - factor);
     const color = tempColor(cooled);
-    return L.circle([lat,lng],{ radius: 500, color, fillColor: color, fillOpacity:.22, weight:1 })
-      .bindTooltip(`Impact: -${(temp-cooled).toFixed(1)}°C`);
+    // Create impact area as rectangle representing building blocks
+    const offsetLat = 0.004; // larger impact area
+    const offsetLng = 0.006; // larger impact area
+    const bounds = [
+      [lat - offsetLat, lng - offsetLng],
+      [lat + offsetLat, lng + offsetLng]
+    ];
+    return L.rectangle(bounds, { 
+      color: color, 
+      fillColor: color, 
+      fillOpacity: 0.3, 
+      weight: 1,
+      stroke: true
+    }).bindTooltip(`Impact: -${(temp-cooled).toFixed(1)}°C`);
   });
-  appState.layers.impact = L.layerGroup(circles);
+  appState.layers.impact = L.layerGroup(rectangles);
+}
+
+// Fetch real temperature data from OpenWeather API
+async function fetchRealHeatmapData(locations) {
+  const key = 'acce1388ea5659880c18e478e553acec';
+  const temperatureData = [];
+  
+  try {
+    // Show loading overlay
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+      loadingOverlay.style.display = 'flex';
+    }
+    
+    // Fetch temperature data for each location (with rate limiting)
+    for (let i = 0; i < locations.length; i++) {
+      const location = locations[i];
+      try {
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lng}&appid=${key}&units=metric`;
+        const response = await fetch(url);
+        
+        if (response.ok) {
+          const data = await response.json();
+          const temp = data.main?.temp || 20; // fallback temperature
+          temperatureData.push({
+            lat: location.lat,
+            lng: location.lng,
+            temp: temp,
+            name: location.name,
+            feels_like: data.main?.feels_like || temp,
+            humidity: data.main?.humidity || 50
+          });
+        } else {
+          // Fallback for failed requests
+          temperatureData.push({
+            lat: location.lat,
+            lng: location.lng, 
+            temp: 22, // default temp
+            name: location.name,
+            feels_like: 22,
+            humidity: 50
+          });
+        }
+        
+        // Rate limit: wait 100ms between requests to avoid overwhelming the API
+        if (i < locations.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      } catch (error) {
+        console.log(`Failed to fetch data for ${location.name}:`, error);
+        // Add fallback data
+        temperatureData.push({
+          lat: location.lat,
+          lng: location.lng,
+          temp: 22,
+          name: location.name,
+          feels_like: 22,
+          humidity: 50
+        });
+      }
+    }
+    
+    // Store the real data
+    appState.points = temperatureData.map(d => [d.lat, d.lng, d.temp]);
+    
+    // Build heat layer with real data
+    buildRealHeatLayer(temperatureData);
+    
+    // Build impact and tree layers with real data
+    buildImpactLayer(getCoolingPercent());
+    buildTreeIconsLayer();
+    
+    // Hide loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+    
+  } catch (error) {
+    console.error('Error fetching heatmap data:', error);
+    // Hide loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+    // Fall back to default behavior if API fails completely
+  }
+}
+
+function buildRealHeatLayer(temperatureData) {
+  appState.layers.heat.clearLayers();
+  
+  temperatureData.forEach(data => {
+    const c = tempColor(data.temp);
+    // Create a small rectangular area around the point to represent a building block
+    const offsetLat = 0.002; // roughly 200m
+    const offsetLng = 0.003; // roughly 200m  
+    const bounds = [
+      [data.lat - offsetLat, data.lng - offsetLng],
+      [data.lat + offsetLat, data.lng + offsetLng]
+    ];
+    
+    const rectangle = L.rectangle(bounds, { 
+      color: c, 
+      fillColor: c, 
+      fillOpacity: 0.6, 
+      weight: 2,
+      stroke: true
+    }).bindTooltip(`
+      <strong>${data.name}</strong><br/>
+      Temperature: ${data.temp.toFixed(1)}°C<br/>
+      Feels like: ${data.feels_like.toFixed(1)}°C<br/>
+      Humidity: ${data.humidity}%
+    `);
+    
+    appState.layers.heat.addLayer(rectangle);
+  });
+}
+
+function buildTreeIconsLayer(){
+  if(appState.layers.treeIcons){ appState.layers.treeIcons.clearLayers(); }
+  
+  // Create custom tree icon using the tree asset
+  const treeIcon = L.icon({
+    iconUrl: 'Tree art.png',
+    iconSize: [32, 32], // size of the icon
+    iconAnchor: [16, 32], // point of the icon which will correspond to marker's location
+    popupAnchor: [0, -32] // point from which the popup should open relative to the iconAnchor
+  });
+
+  // Create tree markers at hotspot locations to show impact of tree planting
+  const treeMarkers = appState.points.map(([lat,lng,temp])=>{
+    return L.marker([lat, lng], {icon: treeIcon})
+      .bindTooltip(`Tree planted - Cooling: -2.5°C`);
+  });
+  
+  appState.layers.treeIcons = L.layerGroup(treeMarkers);
 }
 
 function toggleMode(mode){
   appState.ui.mode = mode;
   const { map, layers } = appState;
-  [layers.heat, layers.impact, layers.trees, layers.readings].forEach(l=> l && map.removeLayer(l));
-  if(mode==='heat'){ layers.heat && layers.heat.addTo(map);} 
-  if(mode==='impact'){ layers.impact && layers.impact.addTo(map);} 
-  if(mode==='trees'){ layers.trees && layers.trees.addTo(map);} 
-  if(mode==='readings'){ layers.readings && layers.readings.addTo(map);} 
+  // Remove all layers first
+  [layers.heat, layers.impact, layers.trees, layers.treeIcons].forEach(l=> l && map.removeLayer(l));
+  
+  if(mode==='heat'){ 
+    layers.heat && layers.heat.addTo(map);
+  } 
+  if(mode==='trees'){ 
+    // When trees mode is activated, show tree icons instead of hotspots
+    layers.treeIcons && layers.treeIcons.addTo(map);
+    layers.trees && layers.trees.addTo(map); // Also show the user-painted trees
+  } 
 }
 
-function renderReadings(){
-  const group = appState.layers.readings;
-  group.clearLayers();
-  appState.readings.forEach(r=>{
-    const m = L.marker(r.latlng);
-    m.bindPopup(`<strong>${r.temp}°C</strong><br/>${r.notes||''}`);
-    group.addLayer(m);
-  });
-}
-
-function saveReading(temp, notes){
-  let lastClick = null;
-  const toRemove = [];
-  appState.map.eachLayer(l=>{ if(l instanceof L.Marker && l._isTemp){ lastClick = l.getLatLng(); toRemove.push(l);} });
-  toRemove.forEach(l=> appState.map.removeLayer(l));
-  if(!lastClick){ alert('Click the map to place your reading pin.'); return; }
-  appState.readings.push({ latlng: lastClick, temp: Number(temp), notes });
-  localStorage.setItem('canopy_readings', JSON.stringify(appState.readings));
-  renderReadings();
-}
+// Removed unused reading functionality to simplify the app
 
 // Weather integration (OpenWeather Current Weather)
 async function fetchWeatherForCenter(){
@@ -227,31 +375,49 @@ function enableTreePainting(){
 }
 
 function initUI(){
+  // Simplified UI event handlers
   document.getElementById('openOnboarding').addEventListener('click',()=>document.getElementById('onboarding').showModal());
+  
+  // Main CTA button - plant trees and show impact
   document.getElementById('plantTrees').addEventListener('click',()=>{
     document.getElementById('coolingSlider').value = 20;
     buildImpactLayer(getCoolingPercent());
-    toggleMode('impact');
+    toggleMode('trees');
+    // Show the impact slider
+    document.getElementById('impactSlider').style.display = 'block';
+    // Update button states
+    setActiveViewButton('toggleTrees');
   });
-  document.getElementById('addReading').addEventListener('click',()=>{
-    document.getElementById('readingModal').showModal();
-  });
-  document.getElementById('saveReading').addEventListener('click',(e)=>{
-    e.preventDefault();
-    const t = document.getElementById('readingTemp').value;
-    const n = document.getElementById('readingNotes').value;
-    saveReading(t,n);
-    document.getElementById('readingModal').close();
-  });
+  
+  // Cooling slider updates
   document.getElementById('coolingSlider').addEventListener('input',()=>{
     buildImpactLayer(getCoolingPercent());
-    if(appState.ui.mode==='impact'){ toggleMode('impact'); }
+    if(appState.ui.mode === 'trees'){ 
+      toggleMode('trees'); 
+    }
   });
-  const setActive=(id,active)=>{ const el=document.getElementById(id); el.classList.toggle('active',active); };
-  document.getElementById('toggleHeat').addEventListener('click',()=>{ toggleMode('heat'); setActive('toggleHeat',true);['toggleImpact','toggleTrees','toggleReadings'].forEach(id=>setActive(id,false)); });
-  document.getElementById('toggleImpact').addEventListener('click',()=>{ toggleMode('impact'); setActive('toggleImpact',true);['toggleHeat','toggleTrees','toggleReadings'].forEach(id=>setActive(id,false)); });
-  document.getElementById('toggleTrees').addEventListener('click',()=>{ toggleMode('trees'); setActive('toggleTrees',true);['toggleHeat','toggleImpact','toggleReadings'].forEach(id=>setActive(id,false)); });
-  document.getElementById('toggleReadings').addEventListener('click',()=>{ toggleMode('readings'); setActive('toggleReadings',true);['toggleHeat','toggleImpact','toggleTrees'].forEach(id=>setActive(id,false)); });
+  
+  // Simplified view toggles
+  const setActiveViewButton = (activeId) => {
+    ['toggleHeat', 'toggleTrees'].forEach(id => {
+      document.getElementById(id).classList.toggle('active', id === activeId);
+    });
+  };
+  
+  document.getElementById('toggleHeat').addEventListener('click',()=>{
+    toggleMode('heat');
+    setActiveViewButton('toggleHeat');
+    // Hide impact slider when viewing heat data
+    document.getElementById('impactSlider').style.display = 'none';
+  });
+  
+  document.getElementById('toggleTrees').addEventListener('click',()=>{
+    toggleMode('trees');
+    setActiveViewButton('toggleTrees');
+    // Show impact slider when viewing tree impact
+    document.getElementById('impactSlider').style.display = 'block';
+  });
+  
   document.getElementById('githubLink').href = 'https://github.com/Kso6/COMMSTEM-X-CANVA-HACKATHON';
 }
 

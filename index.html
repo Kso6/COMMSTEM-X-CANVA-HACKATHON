@@ -24,103 +24,106 @@
   <main class="layout">
     <section class="left-panel">
       <div class="card hero">
-        <h1>Cool cities, powered by nature</h1>
-        <p>Identify urban heat, simulate tree planting, and share community readings. No signups. No fees.</p>
-        <div class="cta-row">
-          <button id="plantTrees" class="btn success">Plant 100 trees</button>
-          <button id="addReading" class="btn">Add my reading</button>
-        </div>
+        <h1>🌿 Cool Sydney with Trees</h1>
+        <p>See real-time heat data and discover how trees can cool your city by up to 5°C.</p>
+        <button id="plantTrees" class="btn cta-primary">🌳 Plant Trees & See Impact</button>
       </div>
-      <div class="card controls">
-        <h2>Scenario</h2>
-        <div class="control">
-          <label for="coolingSlider">Tree canopy increase</label>
+      
+      <div class="card simple-controls">
+        <h2>What would you like to see?</h2>
+        <div class="view-buttons">
+          <button id="toggleHeat" class="btn view-btn active">
+            🔥 Real Heat Data
+          </button>
+          <button id="toggleTrees" class="btn view-btn">
+            🌳 Tree Impact
+          </button>
+        </div>
+        
+        <div class="impact-slider" id="impactSlider" style="display: none;">
+          <label for="coolingSlider">Tree Coverage Impact</label>
           <input type="range" id="coolingSlider" min="0" max="30" value="10"/>
-          <div class="hint">Approx. −1.5°C per +10% canopy in hotspots</div>
-        </div>
-        <div class="control grid">
-          <button id="toggleHeat" class="btn toggle active">Heat map</button>
-          <button id="toggleImpact" class="btn toggle">Impact</button>
-          <button id="toggleTrees" class="btn toggle">Trees</button>
-          <button id="toggleReadings" class="btn toggle">Community</button>
+          <div class="slider-label">More trees = More cooling</div>
         </div>
       </div>
-      <div class="card weather">
-        <h2>Weather now</h2>
+
+      <div class="card current-weather">
+        <h2>📍 Current Weather</h2>
         <div id="weatherSummary" class="weather-summary">
-          <div class="w-row">
-            <div class="w-main"><span id="wCity" class="skeleton">Loading…</span></div>
-            <div class="w-temp"><img id="wIcon" alt="" class="w-icon skeleton"/><span id="wTemp" class="skeleton">—</span>°C</div>
+          <div class="w-main">
+            <div class="temp-display">
+              <img id="wIcon" alt="" class="w-icon skeleton"/>
+              <span id="wTemp" class="temp-number skeleton">—</span>°C
+            </div>
+            <div class="location-name">
+              <span id="wCity" class="skeleton">Loading location...</span>
+            </div>
           </div>
-          <div class="w-meta">
-            <span id="wCond" class="skeleton">—</span>
-            <span>•</span>
+          <div class="weather-details">
+            <span id="wCond" class="skeleton">—</span> • 
             <span id="wFeels" class="skeleton">feels like —°C</span>
-            <span>•</span>
-            <span id="wHum" class="skeleton">—% humidity</span>
-            <span>•</span>
-            <span id="wWind" class="skeleton">— m/s wind</span>
-            <span>•</span>
-            <span id="wAQI" class="skeleton">AQI —</span>
           </div>
-          <div class="w-forecast" id="wForecast"></div>
-          <div class="w-updated" id="wUpdated">Updated —</div>
         </div>
       </div>
     </section>
+    
     <section class="map-panel">
       <div id="map"></div>
-      <button id="locateMe" class="fab" title="Use my location">📍</button>
+      <button id="locateMe" class="fab" title="📍 Find my location">📍</button>
       <div id="legend" class="legend">
-        <div class="legend-title">Surface temperature (°C)</div>
+        <div class="legend-title">Temperature</div>
         <div class="scale">
-          <span style="--c:#2c7bb6">20</span>
-          <span style="--c:#abd9e9">25</span>
-          <span style="--c:#ffffbf">30</span>
-          <span style="--c:#fdae61">35</span>
-          <span style="--c:#d7191c">40+</span>
+          <span style="--c:#2c7bb6">Cool</span>
+          <span style="--c:#abd9e9">Mild</span>
+          <span style="--c:#ffffbf">Warm</span>
+          <span style="--c:#fdae61">Hot</span>
+          <span style="--c:#d7191c">Very Hot</span>
+        </div>
+      </div>
+      
+      <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>Loading real temperature data...</p>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Onboarding Modal -->
+  <!-- Simple Onboarding Modal -->
   <dialog id="onboarding" class="modal">
     <form method="dialog" class="modal-card">
       <header>
-        <h3>How it works</h3>
+        <h3>🌿 Cool Sydney with Trees</h3>
         <button class="icon-btn" value="cancel">×</button>
       </header>
       <section class="content">
-        <ol class="steps">
-          <li><strong>Heat</strong>: We approximate hotspots from open map context.</li>
-          <li><strong>Plant</strong>: Drag to add trees. Slider simulates canopy increase.</li>
-          <li><strong>Impact</strong>: See estimated cooling and households helped.</li>
-          <li><strong>Share</strong>: Add your street-level reading and pin it.</li>
-        </ol>
-        <p class="fine">This is a no-backend prototype. Your data stays in your browser.</p>
+        <div class="simple-steps">
+          <div class="step">
+            <div class="step-icon">🔥</div>
+            <div class="step-text">
+              <strong>See Real Heat Data</strong><br>
+              Live temperature readings across Sydney
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-icon">🌳</div>
+            <div class="step-text">
+              <strong>Plant Virtual Trees</strong><br>
+              Discover how trees can cool cities by up to 5°C
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-icon">📱</div>
+            <div class="step-text">
+              <strong>Simple & Free</strong><br>
+              No signup required. Works on any device.
+            </div>
+          </div>
+        </div>
       </section>
       <footer>
-        <button class="btn primary" value="cancel">Got it</button>
-      </footer>
-    </form>
-  </dialog>
-
-  <!-- Add Reading Modal -->
-  <dialog id="readingModal" class="modal">
-    <form method="dialog" class="modal-card" id="readingForm">
-      <header>
-        <h3>Add a reading</h3>
-        <button class="icon-btn" value="cancel">×</button>
-      </header>
-      <section class="content form">
-        <label>Temperature (°C) <input required type="number" step="0.1" id="readingTemp" placeholder="e.g. 34.6" /></label>
-        <label>Notes <input type="text" id="readingNotes" placeholder="Near bus stop, no trees"/></label>
-        <div class="hint">Click the map to place your reading pin.</div>
-      </section>
-      <footer>
-        <button class="btn" value="cancel">Cancel</button>
-        <button class="btn success" id="saveReading">Save</button>
+        <button class="btn primary" value="cancel">Start Exploring</button>
       </footer>
     </form>
   </dialog>
