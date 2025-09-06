@@ -1,63 +1,48 @@
-# Sydney Urban Cooling
+Our Project: Sydney Urban Cooling
+We built this together with one goal in mind: to help cool down our city using the wisdom of nature. Sydney Urban Cooling is our way of showing how tree canopy coverage can fight back against the rising heat in urban spaces—and how everyday people can be part of the solution.
 
-A nature-inspired solution to combat urban heat islands in Sydney through tree canopy simulation and community engagement.
+What We Made:
+Our web app lets you explore Sydney’s urban heat islands and see how planting trees—virtually and in real life—can make a real difference. It is a simulation - based solution as to how plantation can help rejuvanate and revitalise Sydney.
 
-## 🌿 About
+What You Can Do With It
+- See the Heat: Explore a live heat map of Sydney’s hottest urban zones
+- Simulate Tree Coverage: Add trees to the map and watch the temperature shift
+- Plant Interactively: Draw your own tree canopy and test its cooling effect
+- Share Readings: Upload your own temperature data to help crowdsource insights
+- Check the Weather: Get real-time conditions via OpenWeather
+- Use It Anywhere: It works smoothly on both desktop and mobile
 
-Sydney Urban Cooling is a web application that visualizes urban heat islands in Sydney and demonstrates how increasing tree canopy coverage can help mitigate these effects. The project was created for the 2025 Comm-Stem Hackathon with the theme "Hack with Nature, Build for Tomorrow."
+Why Trees?
+We took inspiration from how forests naturally regulate temperature. Here’s what trees do that we tried to simulate:
+- They release water vapor through evapotranspiration, cooling the air
+- Their canopies create shade, lowering surface temperatures
+- They redirect wind, improving airflow in dense urban areas
+- They absorb carbon, helping fight climate change
+We wanted to bring those benefits into the city—digitally first, then physically.
 
-## 🔥 Features
+How We Built It
+We kept things lightweight and accessible:
+- Frontend: HTML5, CSS3, and vanilla JavaScript
+- Maps: Leaflet.js for the interactive heat map
+- Weather: OpenWeather API for live data
+- Storage: Browser localStorage to save community readings
+- Hosting: Static site—no backend needed
 
-- **Heat Map Visualization**: View Sydney's urban heat island hotspots
-- **Tree Canopy Simulation**: Visualize the cooling impact of increased tree coverage
-- **Interactive Tree Planting**: Draw trees directly on the map to see their effect
-- **Community Readings**: Add your own temperature readings to crowdsource data
-- **Real-time Weather**: Integration with OpenWeather API to show current conditions
-- **Responsive Design**: Works on desktop and mobile devices
+Why It Matters
+Urban heat islands can push city temperatures up by as much as 12°C compared to nearby rural areas. By increasing tree coverage, we can:
+- Cool hotspots by 1–5°C
+- Cut energy use for air conditioning by up to 30%
+- Improve air quality and reduce health risks
+- Make cities more livable and resilient
 
-## 🌱 Inspiration from Nature
+🔗 Learn More
+- OpenWeather API
+- Leaflet.js
+- EPA on Urban Heat Islands
 
-This project is inspired by the natural cooling mechanisms of forest canopies:
+📝 License
+This project is open source under the MIT License. We hope others build on it, remix it, and plant their own ideas.
 
-1. **Evapotranspiration**: Trees release water vapor, cooling the surrounding air
-2. **Shade Creation**: Tree canopies block direct sunlight, reducing surface temperatures
-3. **Wind Modification**: Trees alter air movement patterns, improving urban ventilation
-4. **Carbon Sequestration**: Trees absorb CO₂, helping mitigate climate change
+Built with care for the 2025 Comm-Stem Hackathon
+Theme: Hack with Nature, Build for Tomorrow
 
-## 🛠️ Technology
-
-- **Frontend**: HTML5, CSS3, JavaScript (vanilla)
-- **Mapping**: Leaflet.js for interactive maps
-- **Weather Data**: OpenWeather API for current conditions and forecasts
-- **Storage**: Browser localStorage for community readings
-- **Deployment**: Static site, no backend required
-
-## 🚀 Getting Started
-
-1. Clone the repository
-2. Open `index.html` in your browser
-3. Explore the heat map and try the different features
-4. Add your own temperature readings
-
-## 📊 Impact
-
-Urban heat islands can increase temperatures by up to 12°C in cities compared to surrounding areas. By strategically increasing tree canopy coverage, we can:
-
-- Reduce temperatures by 1-5°C in urban hotspots
-- Lower energy consumption for cooling by up to 30%
-- Improve air quality and public health
-- Create more livable urban spaces
-
-## 🔗 Resources
-
-- [OpenWeather API](https://openweathermap.org/api)
-- [Leaflet.js](https://leafletjs.com/)
-- [Urban Heat Island Effect - EPA](https://www.epa.gov/heatislands)
-
-## 📝 License
-
-This project is open source and available under the MIT License.
-
----
-
-Created for the 2025 Comm-Stem Hackathon | Theme: "Hack with Nature, Build for Tomorrow"
