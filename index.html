@@ -14,7 +14,7 @@
   <header class="app-header">
     <div class="brand">
       <div class="logo">🌿</div>
-      <div class="title">Sydney Urban Cooling</div>
+      <div class="title">Thallo</div>
     </div>
     <nav class="header-actions">
       <button id="openOnboarding" class="btn primary">How it works</button>
@@ -44,6 +44,24 @@
           <label for="coolingSlider">Tree Coverage Impact</label>
           <input type="range" id="coolingSlider" min="0" max="30" value="10"/>
           <div class="slider-label">More trees = More cooling</div>
+        </div>
+      </div>
+
+      <div class="card cooling-impact" id="coolingImpactCard" style="display: none;">
+        <h2>🌡️ Cooling Impact</h2>
+        <div id="impactDisplay" class="impact-display">
+          <div class="impact-stat">
+            <div class="stat-label">Temperature Reduction</div>
+            <div class="stat-value" id="tempReduction">-2.5°C</div>
+          </div>
+          <div class="impact-stat">
+            <div class="stat-label">Trees Planted</div>
+            <div class="stat-value" id="treesPlanted">15 trees</div>
+          </div>
+          <div class="impact-stat">
+            <div class="stat-label">Area Coverage</div>
+            <div class="stat-value" id="areaCoverage">45%</div>
+          </div>
         </div>
       </div>
 

@@ -4,6 +4,8 @@ const appState = {
   layers: { heat: null, impact: null, trees: L.layerGroup(), treeIcons: L.layerGroup() },
   points: [],
   treePolygons: [],
+  treeDensities: {}, // Track tree density for each heat spot
+  selectedHeatSpot: null, // Track which heat spot is selected
   ui: { mode: 'heat' },
   weather: { lastCenter: null, data: null }
 };
@@ -14,15 +16,13 @@ function initMap(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap' }).addTo(map);
   appState.map = map;
 
-  // Key Sydney locations for real temperature data
+  // Key Sydney land-based locations for real temperature data (no water areas)
   const sydneyLocations = [
-    // Sydney CBD and Inner City
+    // Sydney CBD and Inner City (land-based only)
     {lat: -33.8688, lng: 151.2093, name: "Sydney CBD"},
     {lat: -33.8695, lng: 151.2085, name: "Martin Place"},
     {lat: -33.8705, lng: 151.2105, name: "Town Hall"},
     {lat: -33.8680, lng: 151.2120, name: "Hyde Park"},
-    {lat: -33.8568, lng: 151.2153, name: "The Rocks"},
-    {lat: -33.8590, lng: 151.2110, name: "Circular Quay"},
     {lat: -33.8752, lng: 151.2380, name: "Kings Cross"},
     {lat: -33.8789, lng: 151.2405, name: "Darlinghurst"},
     {lat: -33.8820, lng: 151.2090, name: "Surry Hills"},
@@ -30,22 +30,22 @@ function initMap(){
     {lat: -33.8910, lng: 151.1980, name: "Redfern"},
     {lat: -33.8780, lng: 151.1850, name: "Glebe"},
     
-    // Northern Suburbs
+    // Northern Suburbs (inland areas)
     {lat: -33.8370, lng: 151.2140, name: "North Sydney"},
-    {lat: -33.8280, lng: 151.2200, name: "Kirribilli"},
-    {lat: -33.8200, lng: 151.2300, name: "Neutral Bay"},
     {lat: -33.7680, lng: 151.1543, name: "Macquarie Park"},
+    {lat: -33.7950, lng: 151.1450, name: "Chatswood"},
     
-    // Eastern Suburbs
+    // Eastern Suburbs (away from water)
     {lat: -33.8950, lng: 151.2450, name: "Paddington"},
     {lat: -33.9148, lng: 151.2321, name: "Randwick"},
     {lat: -33.9300, lng: 151.2800, name: "Bondi Junction"},
-    {lat: -33.8920, lng: 151.2770, name: "Bondi Beach"},
+    {lat: -33.9050, lng: 151.2500, name: "Kensington"},
     
-    // Western Suburbs
+    // Western Suburbs 
     {lat: -33.8697, lng: 151.1070, name: "Parramatta"},
     {lat: -33.8500, lng: 151.0800, name: "Auburn"},
     {lat: -33.8200, lng: 151.0300, name: "Blacktown"},
+    {lat: -33.8650, lng: 151.1650, name: "Ashfield"},
     
     // Southern Suburbs
     {lat: -33.9173, lng: 151.0642, name: "Bankstown"},
@@ -226,33 +226,93 @@ function buildRealHeatLayer(temperatureData) {
       fillColor: c, 
       fillOpacity: 0.6, 
       weight: 2,
-      stroke: true
+      stroke: true,
+      className: 'heat-spot-clickable'
     }).bindTooltip(`
       <strong>${data.name}</strong><br/>
       Temperature: ${data.temp.toFixed(1)}°C<br/>
       Feels like: ${data.feels_like.toFixed(1)}°C<br/>
-      Humidity: ${data.humidity}%
+      Humidity: ${data.humidity}%<br/>
+      <em>Click to select for tree planting</em>
     `);
+    
+    // Make heat spots clickable for selection
+    rectangle.on('click', function(e) {
+      selectHeatSpot(data);
+      L.DomEvent.stopPropagation(e);
+    });
     
     appState.layers.heat.addLayer(rectangle);
   });
 }
 
+function selectHeatSpot(data) {
+  appState.selectedHeatSpot = data;
+  
+  // Store the selected heat spot in treeDensities if not exists
+  const spotKey = `${data.lat}_${data.lng}`;
+  if (!appState.treeDensities[spotKey]) {
+    appState.treeDensities[spotKey] = 3; // Start with 3 trees
+  }
+  
+  // Visual feedback - highlight selected heat spot
+  appState.layers.heat.eachLayer(layer => {
+    if (layer.getBounds) {
+      const bounds = layer.getBounds();
+      const center = bounds.getCenter();
+      if (Math.abs(center.lat - data.lat) < 0.002 && Math.abs(center.lng - data.lng) < 0.002) {
+        layer.setStyle({ weight: 4, color: '#10b981', fillOpacity: 0.8 }); // Highlight selected
+      } else {
+        layer.setStyle({ weight: 2, fillOpacity: 0.6 }); // Reset others
+      }
+    }
+  });
+  
+  // Update UI to show selection
+  const plantButton = document.getElementById('plantTrees');
+  plantButton.textContent = `🌳 Plant Trees in ${data.name}`;
+  plantButton.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+}
+
 function buildTreeIconsLayer(){
   if(appState.layers.treeIcons){ appState.layers.treeIcons.clearLayers(); }
   
-  // Create custom tree icon using the tree asset
-  const treeIcon = L.icon({
-    iconUrl: 'Tree art.png',
-    iconSize: [32, 32], // size of the icon
-    iconAnchor: [16, 32], // point of the icon which will correspond to marker's location
-    popupAnchor: [0, -32] // point from which the popup should open relative to the iconAnchor
-  });
+  const treeMarkers = [];
+  
+  // If there's a selected heat spot, focus on it; otherwise show all
+  const spotsToProcess = appState.selectedHeatSpot ? 
+    [[appState.selectedHeatSpot.lat, appState.selectedHeatSpot.lng, appState.selectedHeatSpot.temp]] : 
+    appState.points;
+  
+  spotsToProcess.forEach(([lat, lng, temp], index) => {
+    const spotKey = `${lat}_${lng}`;
+    // Initialize with 3 trees if not set
+    if (!appState.treeDensities[spotKey]) {
+      appState.treeDensities[spotKey] = 3;
+    }
+    
+    const density = appState.treeDensities[spotKey];
+    const coverage = getCoolingPercent();
+    const adjustedDensity = Math.max(1, Math.round(density * (coverage / 10)));
+    
+    // Create multiple trees in a small cluster for each heat spot
+    for (let i = 0; i < adjustedDensity; i++) {
+      const offsetLat = (Math.random() - 0.5) * 0.001; // small random offset
+      const offsetLng = (Math.random() - 0.5) * 0.001;
+      
+      // Size based on coverage level
+      const size = Math.min(40, 20 + (coverage * 0.8));
+      
+      const treeIcon = L.icon({
+        iconUrl: 'Tree art.png',
+        iconSize: [size, size],
+        iconAnchor: [size/2, size],
+        popupAnchor: [0, -size]
+      });
 
-  // Create tree markers at hotspot locations to show impact of tree planting
-  const treeMarkers = appState.points.map(([lat,lng,temp])=>{
-    return L.marker([lat, lng], {icon: treeIcon})
-      .bindTooltip(`Tree planted - Cooling: -2.5°C`);
+      const marker = L.marker([lat + offsetLat, lng + offsetLng], {icon: treeIcon});
+      treeMarkers.push(marker);
+    }
   });
   
   appState.layers.treeIcons = L.layerGroup(treeMarkers);
@@ -266,12 +326,40 @@ function toggleMode(mode){
   
   if(mode==='heat'){ 
     layers.heat && layers.heat.addTo(map);
+    // Hide cooling impact card in heat mode
+    document.getElementById('coolingImpactCard').style.display = 'none';
   } 
   if(mode==='trees'){ 
     // When trees mode is activated, show tree icons instead of hotspots
     layers.treeIcons && layers.treeIcons.addTo(map);
     layers.trees && layers.trees.addTo(map); // Also show the user-painted trees
+    // Show cooling impact card in tree mode
+    document.getElementById('coolingImpactCard').style.display = 'block';
+    updateCoolingImpactDisplay();
   } 
+}
+
+function updateCoolingImpactDisplay() {
+  const coverage = getCoolingPercent();
+  
+  // Calculate for selected area only if available
+  let totalTrees = 0;
+  if (appState.selectedHeatSpot) {
+    const spotKey = `${appState.selectedHeatSpot.lat}_${appState.selectedHeatSpot.lng}`;
+    const density = appState.treeDensities[spotKey] || 3;
+    totalTrees = Math.max(1, Math.round(density * (coverage / 10)));
+  } else {
+    totalTrees = Object.values(appState.treeDensities).reduce((sum, density) => {
+      return sum + Math.max(1, Math.round(density * (coverage / 10)));
+    }, 0);
+  }
+  
+  const tempReduction = (coverage * 0.15).toFixed(1); // 1.5°C per 10% coverage
+  const areaCoverage = Math.min(100, coverage * 3).toFixed(0); // Approximate area coverage
+  
+  document.getElementById('tempReduction').textContent = `-${tempReduction}°C`;
+  document.getElementById('treesPlanted').textContent = `${totalTrees} trees`;
+  document.getElementById('areaCoverage').textContent = `${areaCoverage}%`;
 }
 
 // Removed unused reading functionality to simplify the app
@@ -380,8 +468,14 @@ function initUI(){
   
   // Main CTA button - plant trees and show impact
   document.getElementById('plantTrees').addEventListener('click',()=>{
+    if (!appState.selectedHeatSpot) {
+      alert('Please select a heat spot on the map first by clicking on it!');
+      return;
+    }
+    
     document.getElementById('coolingSlider').value = 20;
     buildImpactLayer(getCoolingPercent());
+    buildTreeIconsLayer(); // Rebuild trees with new density
     toggleMode('trees');
     // Show the impact slider
     document.getElementById('impactSlider').style.display = 'block';
@@ -393,7 +487,9 @@ function initUI(){
   document.getElementById('coolingSlider').addEventListener('input',()=>{
     buildImpactLayer(getCoolingPercent());
     if(appState.ui.mode === 'trees'){ 
-      toggleMode('trees'); 
+      buildTreeIconsLayer(); // Rebuild trees with new density
+      toggleMode('trees');
+      updateCoolingImpactDisplay();
     }
   });
   
@@ -409,9 +505,17 @@ function initUI(){
     setActiveViewButton('toggleHeat');
     // Hide impact slider when viewing heat data
     document.getElementById('impactSlider').style.display = 'none';
+    // Reset plant button text
+    document.getElementById('plantTrees').textContent = '🌳 Plant Trees & See Impact';
   });
   
   document.getElementById('toggleTrees').addEventListener('click',()=>{
+    if (!appState.selectedHeatSpot) {
+      alert('Please select a heat spot on the map first by clicking on it!');
+      setActiveViewButton('toggleHeat');
+      return;
+    }
+    
     toggleMode('trees');
     setActiveViewButton('toggleTrees');
     // Show impact slider when viewing tree impact
