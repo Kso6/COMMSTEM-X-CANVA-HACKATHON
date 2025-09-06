@@ -748,16 +748,10 @@ function toggleMode(mode){
   // Remove all layers first
   [layers.heat, layers.impact, layers.trees, layers.treeIcons].forEach(l=> l && map.removeLayer(l));
   
-  const weatherCard = document.querySelector('.current-weather');
-  
   if(mode==='heat'){ 
     layers.heat && layers.heat.addTo(map);
     // Hide cooling impact card in heat mode
     document.getElementById('coolingImpactCard').style.display = 'none';
-    // Remove compact mode from weather card
-    if (weatherCard) {
-      weatherCard.classList.remove('compact');
-    }
     // Reset all heat spot highlighting when switching back to heat mode
     resetHeatSpotHighlighting();
   } 
@@ -767,10 +761,6 @@ function toggleMode(mode){
     layers.trees && layers.trees.addTo(map); // Also show the user-painted trees
     // Show cooling impact card in tree mode
     document.getElementById('coolingImpactCard').style.display = 'block';
-    // Add compact mode to weather card to save space
-    if (weatherCard) {
-      weatherCard.classList.add('compact');
-    }
     updateCoolingImpactDisplay();
   } 
 }
@@ -1029,6 +1019,18 @@ function initUI(){
     // Change button text to indicate it can toggle back
     document.getElementById('plantTrees').textContent = '🔍 View Real Heat Data';
     document.getElementById('plantTrees').style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+    
+    // Smooth scroll to show the weather card after the cooling impact appears
+    setTimeout(() => {
+      const weatherCard = document.querySelector('.current-weather');
+      if (weatherCard) {
+        weatherCard.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end',
+          inline: 'nearest'
+        });
+      }
+    }, 600); // Delay to let the cooling impact card appear and animate
   });
   
   // Tree count slider updates (each step = 1 tree)
@@ -1081,6 +1083,18 @@ function initUI(){
     // Update main button text to reflect toggle capability
     document.getElementById('plantTrees').textContent = '🔍 View Real Heat Data';
     document.getElementById('plantTrees').style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+    
+    // Smooth scroll to show the weather card after the cooling impact appears
+    setTimeout(() => {
+      const weatherCard = document.querySelector('.current-weather');
+      if (weatherCard) {
+        weatherCard.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end',
+          inline: 'nearest'
+        });
+      }
+    }, 600); // Delay to let the cooling impact card appear and animate
   });
   
   document.getElementById('githubLink').href = 'https://github.com/Kso6/COMMSTEM-X-CANVA-HACKATHON';
