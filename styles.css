@@ -106,3 +106,4 @@ body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backg
 }
 
 @media (max-width: 1000px){.layout{grid-template-columns:1fr}.map-panel{height:52vh}.view-buttons{grid-template-columns:1fr}}
+
