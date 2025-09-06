@@ -1030,7 +1030,7 @@ function initUI(){
           inline: 'nearest'
         });
       }
-    }, 600); // Delay to let the cooling impact card appear and animate
+    }, 300); // Quick delay for smooth transition
   });
   
   // Tree count slider updates (each step = 1 tree)
@@ -1094,7 +1094,7 @@ function initUI(){
           inline: 'nearest'
         });
       }
-    }, 600); // Delay to let the cooling impact card appear and animate
+    }, 300); // Quick delay for smooth transition
   });
   
   document.getElementById('githubLink').href = 'https://github.com/Kso6/COMMSTEM-X-CANVA-HACKATHON';
