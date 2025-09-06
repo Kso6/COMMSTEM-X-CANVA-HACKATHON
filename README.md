@@ -35,12 +35,12 @@ Urban heat islands can push city temperatures up by as much as 12°C compared to
 - Improve air quality and reduce health risks
 - Make cities more livable and resilient
 
-🔗 Learn More
+API and stack used:
 - OpenWeather API
 - Leaflet.js
 - EPA on Urban Heat Islands
 
-📝 License
+License
 This project is open source under the MIT License. We hope others build on it, remix it, and plant their own ideas.
 
 Built with care for the 2025 Comm-Stem Hackathon
