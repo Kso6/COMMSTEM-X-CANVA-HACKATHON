@@ -903,9 +903,49 @@ function renderWeather(){
   setText('wWind', `${wind} m/s wind`);
   setText('wCond', capitalize(cond));
   setText('wUpdated', `Updated ${fmt}`);
-  const icon = d.weather?.[0]?.icon; // e.g. 10d
-  const iconUrl = icon ? `https://openweathermap.org/img/wn/${icon}.png` : '';
-  const img = document.getElementById('wIcon'); if(img) { img.src = iconUrl; img.classList.remove('skeleton'); }
+  
+  // Get weather condition and set dynamic background
+  const weatherMain = d.weather?.[0]?.main?.toLowerCase() || '';
+  const weatherCard = document.querySelector('.current-weather');
+  
+  // Determine background based on weather condition
+  let backgroundImage = '';
+  let weatherIcon = '';
+  
+  if (weatherMain.includes('rain') || weatherMain.includes('drizzle') || weatherMain.includes('thunderstorm')) {
+    backgroundImage = 'url("Rainy Weather.png")';
+    weatherIcon = '🌧️';
+  } else if (weatherMain.includes('clear') || weatherMain.includes('sun')) {
+    backgroundImage = 'url("Sunny Weather.png")';
+    weatherIcon = '☀️';
+  } else {
+    // Cloudy, overcast, mist, fog, etc.
+    backgroundImage = 'url("Cloudy Weather.png")';
+    weatherIcon = '☁️';
+  }
+  
+  // Apply background image
+  if (weatherCard) {
+    weatherCard.style.backgroundImage = backgroundImage;
+  }
+  
+  // Set beautiful weather icon
+  const img = document.getElementById('wIcon');
+  if (img) {
+    img.style.display = 'none'; // Hide the old icon
+    // Create or update emoji icon
+    let emojiIcon = document.getElementById('weatherEmoji');
+    if (!emojiIcon) {
+      emojiIcon = document.createElement('div');
+      emojiIcon.id = 'weatherEmoji';
+      emojiIcon.style.fontSize = '48px';
+      emojiIcon.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+      img.parentNode.insertBefore(emojiIcon, img);
+    }
+    emojiIcon.textContent = weatherIcon;
+    img.classList.remove('skeleton');
+  }
+  
   ['wCity','wTemp','wFeels','wHum','wWind','wCond'].forEach(id=>document.getElementById(id)?.classList.remove('skeleton'));
 }
 
