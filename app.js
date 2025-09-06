@@ -767,7 +767,7 @@ function toggleMode(mode){
   appState.ui.mode = mode;
   const { map, layers } = appState;
   // Remove all layers first
-  [layers.heat, layers.impact, layers.trees, layers.treeIcons].forEach(l=> l && map.removeLayer(l));
+  [layers.heat, layers.impact, layers.treeIcons].forEach(l=> l && map.removeLayer(l));
   
   if(mode==='heat'){ 
     layers.heat && layers.heat.addTo(map);
@@ -779,7 +779,7 @@ function toggleMode(mode){
   if(mode==='trees'){ 
     // When trees mode is activated, show tree icons instead of hotspots
     layers.treeIcons && layers.treeIcons.addTo(map);
-    layers.trees && layers.trees.addTo(map); // Also show the user-painted trees
+    // Note: User-painted trees functionality has been disabled
     // Show cooling impact card in tree mode
     document.getElementById('coolingImpactCard').style.display = 'block';
     updateCoolingImpactDisplay();
@@ -986,19 +986,8 @@ function renderForecast(items){
 }
 
 function enableTreePainting(){
-  // Only allow individual clicks for tree painting, not continuous painting on mouse hold
-  const paint = (latlng)=>{
-    const poly = L.circle(latlng,{ radius:18, color:'#60d394', fillColor:'#60d394', fillOpacity:.25, weight:1 });
-    appState.layers.trees.addLayer(poly);
-    appState.treePolygons.push(poly);
-  };
-  
-  // Only handle click events, removed mousedown/mousemove/mouseup handlers
-  appState.map.on('click', (e)=>{ 
-    if(appState.ui.mode==='trees'){ 
-      paint(e.latlng); 
-    }
-  });
+  // Tree painting functionality disabled - no more green circles on map click
+  // This prevents unwanted green circles when clicking the map in tree mode
 }
 
 function initUI(){
