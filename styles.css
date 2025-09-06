@@ -17,7 +17,11 @@ body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backg
 .btn.toggle{padding:8px 10px;border-radius:8px}
 .btn.toggle.active{outline:2px solid var(--accent);background:#eff6ff}
 .layout{display:grid;grid-template-columns:420px 1fr;gap:16px;padding:16px;height:calc(100vh - 62px)}
-.left-panel{display:flex;flex-direction:column;gap:16px;min-width:320px}
+.left-panel{display:flex;flex-direction:column;gap:16px;min-width:320px;height:calc(100vh - 62px - 32px);overflow-y:auto;padding-right:4px}
+.left-panel::-webkit-scrollbar{width:4px}
+.left-panel::-webkit-scrollbar-track{background:transparent}
+.left-panel::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:2px}
+.left-panel::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,0.2)}
 .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--card-radius);box-shadow:var(--shadow);padding:16px;transition:all 0.3s ease;backdrop-filter:blur(10px)}
 .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.15);border-color:rgba(34,197,94,0.2)}
 .card.hero h1{margin:0 0 12px;font-size:32px;font-weight:700}
@@ -33,13 +37,14 @@ body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backg
 .impact-slider{padding:16px;background:var(--panel-2);border-radius:8px;margin-top:12px}
 .impact-slider label{display:block;margin-bottom:8px;font-weight:500}
 .slider-label{font-size:12px;color:var(--muted);margin-top:4px}
-.cooling-impact{position:relative;background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:1px solid #10b981;overflow:hidden}
+.cooling-impact{position:relative;background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:1px solid #10b981;overflow:hidden;animation:slideInFromTop 0.4s ease-out}
 .cooling-impact::before{content:'🌱';position:absolute;top:-10px;right:-10px;font-size:70px;opacity:0.08;transform:rotate(15deg);pointer-events:none}
-.cooling-impact h2{margin:0 0 16px;font-size:18px;font-weight:600;position:relative;z-index:2}
-.impact-display{display:flex;flex-direction:column;gap:12px;position:relative;z-index:2}
-.impact-stat{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(16,185,129,0.2);background:rgba(255,255,255,0.6);border-radius:8px;margin-bottom:8px;transition:all 0.2s ease}
+.cooling-impact h2{margin:0 0 12px;font-size:18px;font-weight:600;position:relative;z-index:2}
+.impact-display{display:flex;flex-direction:column;gap:8px;position:relative;z-index:2}
+.impact-stat{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid rgba(16,185,129,0.2);background:rgba(255,255,255,0.6);border-radius:6px;margin-bottom:4px;transition:all 0.2s ease}
 .impact-stat:hover{transform:translateY(-1px);box-shadow:0 4px 8px rgba(16,185,129,0.1)}
 .impact-stat:last-child{border-bottom:none;margin-bottom:0}
+@keyframes slideInFromTop{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 .stat-label{font-size:14px;color:var(--muted)}
 .stat-value{font-size:16px;font-weight:600;color:var(--brand);position:relative}
 .stat-value::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:3px;background:var(--brand);border-radius:50%;opacity:0.5}
@@ -47,14 +52,24 @@ body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backg
 .insights-list{display:none}
 .current-weather{position:relative;overflow:hidden;background-size:cover;background-position:center;background-repeat:no-repeat;color:white;border:none;transition:all 0.5s ease}
 .current-weather::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(0,0,0,0.3),rgba(0,0,0,0.1));z-index:1;pointer-events:none}
-.current-weather h2{margin:0 0 16px;font-size:18px;font-weight:600;position:relative;z-index:2;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
-.weather-summary{position:relative;z-index:2}
-.weather-summary .w-main{display:flex;flex-direction:column;gap:12px}
-.temp-display{display:flex;align-items:center;gap:16px}
-.temp-display .w-icon{width:48px;height:48px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))}
-.temp-number{font-size:48px;font-weight:300;color:white;text-shadow:0 2px 8px rgba(0,0,0,0.4);letter-spacing:-1px}
-.location-name{font-size:16px;color:rgba(255,255,255,0.9);font-weight:500;text-shadow:0 1px 2px rgba(0,0,0,0.3)}
-.weather-details{font-size:15px;color:rgba(255,255,255,0.8);margin-top:12px;text-shadow:0 1px 2px rgba(0,0,0,0.3);font-weight:400}
+.current-weather h2{margin:0 0 16px;font-size:18px;font-weight:600;position:relative;z-index:2;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.5);transition:all 0.3s ease}
+.weather-summary{position:relative;z-index:2;transition:all 0.3s ease}
+.weather-summary .w-main{display:flex;flex-direction:column;gap:12px;transition:all 0.3s ease}
+.temp-display{display:flex;align-items:center;gap:16px;transition:all 0.3s ease}
+.temp-display .w-icon{width:48px;height:48px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));transition:all 0.3s ease}
+.temp-number{font-size:48px;font-weight:300;color:white;text-shadow:0 2px 8px rgba(0,0,0,0.4);letter-spacing:-1px;transition:all 0.3s ease}
+.location-name{font-size:16px;color:rgba(255,255,255,0.9);font-weight:500;text-shadow:0 1px 2px rgba(0,0,0,0.3);transition:all 0.3s ease}
+.weather-details{font-size:15px;color:rgba(255,255,255,0.8);margin-top:12px;text-shadow:0 1px 2px rgba(0,0,0,0.3);font-weight:400;transition:all 0.3s ease}
+
+/* Compact mode when cooling impact is visible */
+.current-weather.compact{min-height:auto}
+.current-weather.compact h2{margin:0 0 8px;font-size:16px}
+.current-weather.compact .w-main{flex-direction:row;align-items:center;gap:16px}
+.current-weather.compact .temp-display{gap:8px}
+.current-weather.compact .temp-display .w-icon{width:32px;height:32px}
+.current-weather.compact .temp-number{font-size:32px}
+.current-weather.compact .location-name{font-size:14px}
+.current-weather.compact .weather-details{margin-top:0;font-size:12px}
 .weather .w-updated{color:var(--muted);font-size:11px}
 .weather .w-forecast{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
 .chip{padding:6px 8px;border-radius:999px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font-size:12px}
