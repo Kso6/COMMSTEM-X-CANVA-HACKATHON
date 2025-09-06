@@ -479,18 +479,11 @@ async function fetchHeatIslandData(suburbs) {
           current.temp > hottest.temp ? current : hottest
         );
         
-        // Only include if it's significantly hot (above median + threshold)
-        const suburbMedianTemp = suburbTemperatures
-          .map(p => p.temp)
-          .sort((a, b) => a - b)[Math.floor(suburbTemperatures.length / 2)];
-        
-        // Always show the hottest spot in each suburb (reduced threshold)
-        // Heat island threshold: at least 0.1°C above suburb median, or if it's the hottest
-        if (hottestSpot.temp >= suburbMedianTemp + 0.1 || suburbTemperatures.length > 0) {
+        // Always include the hottest spot in each suburb
+        if (suburbTemperatures.length > 0) {
           heatIslands.push({
             ...hottestSpot,
-            name: `${suburb.name} Heat Island`,
-            tempDifference: (hottestSpot.temp - suburbMedianTemp).toFixed(1)
+            name: `${suburb.name} Heat Island`
           });
         }
       }
@@ -634,7 +627,6 @@ function buildRealHeatLayer(heatIslandData) {
     }).bindTooltip(`
       <strong>${data.name}</strong><br/>
       🌡️ Temperature: ${data.temp.toFixed(1)}°C<br/>
-      🔥 ${data.tempDifference}°C above suburb average<br/>
       Feels like: ${data.feels_like.toFixed(1)}°C<br/>
       Humidity: ${data.humidity}%<br/>
       <em>Click to plant trees in this heat island</em>

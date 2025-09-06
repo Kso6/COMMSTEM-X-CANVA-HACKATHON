@@ -52,10 +52,11 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;ba
 .fab:hover{transform:translateY(-1px)}
 .map-panel{position:relative;border-radius:var(--card-radius);overflow:hidden}
 .map-panel #map{height:100%;width:100%;min-height:420px;border-radius:var(--card-radius)}
-.legend{position:absolute;bottom:12px;right:12px;padding:10px 12px;background:rgba(255,255,255,.98);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:10px;color:var(--text);z-index:9999;box-shadow:0 8px 25px rgba(0,0,0,.15);pointer-events:auto}
-.legend-title{font-size:13px;font-weight:600;margin-bottom:8px}
-.legend .scale{display:flex;gap:8px;margin-top:6px}
-.legend .scale span{display:inline-flex;align-items:center;justify-content:center;width:36px;height:22px;background:var(--c);border-radius:4px;color:white;font-weight:700;font-size:12px;border:1px solid rgba(0,0,0,.2);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.legend{position:absolute;bottom:16px;right:16px;padding:16px 20px;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);border:1px solid rgba(0,0,0,.1);border-radius:12px;color:var(--text);z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.12);pointer-events:auto;font-family:'Inter',sans-serif}
+.legend-title{font-size:14px;font-weight:600;margin-bottom:12px;color:#333;letter-spacing:-0.02em}
+.legend .scale{display:flex;gap:6px;margin-top:8px}
+.legend .scale span{display:inline-flex;align-items:center;justify-content:center;width:44px;height:28px;background:var(--c);border-radius:6px;color:white;font-weight:600;font-size:11px;border:none;text-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform 0.2s ease,box-shadow 0.2s ease;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.legend .scale span:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.2)}
 .modal{border:none;padding:0;border-radius:16px;background:transparent}
 .modal-card{min-width:320px;max-width:560px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
 .modal-card header,.modal-card footer{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
