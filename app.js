@@ -422,7 +422,6 @@ function buildImpactLayer(numTrees){
 }
 
 async function fetchHeatIslandData(suburbs) {
-  const key = 'acce1388ea5659880c18e478e553acec';
   const heatIslands = [];
   
   try {
@@ -440,7 +439,7 @@ async function fetchHeatIslandData(suburbs) {
         
         for (let point of suburb.samplingPoints) {
           try {
-            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${point.lat}&lon=${point.lng}&appid=${key}&units=metric`;
+            const url = `/api/weather?lat=${point.lat}&lon=${point.lng}`;
             const response = await fetch(url);
             
             if (response.ok) {
@@ -514,7 +513,6 @@ async function fetchHeatIslandData(suburbs) {
 }
 
 async function fetchRealHeatmapData(locations) {
-  const key = 'acce1388ea5659880c18e478e553acec';
   const temperatureData = [];
   
   try {
@@ -526,7 +524,7 @@ async function fetchRealHeatmapData(locations) {
     for (let i = 0; i < locations.length; i++) {
       const location = locations[i];
       try {
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lng}&appid=${key}&units=metric`;
+        const url = `/api/weather?lat=${location.lat}&lon=${location.lng}`;
         const response = await fetch(url);
         
         if (response.ok) {
@@ -800,26 +798,25 @@ async function fetchWeatherForCenter(){
   const center = appState.map.getCenter();
   const lat = center.lat.toFixed(4);
   const lon = center.lng.toFixed(4);
-  const key = 'acce1388ea5659880c18e478e553acec';
   try{
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric`;
+    const url = `/api/weather?lat=${lat}&lon=${lon}`;
     const res = await fetch(url);
     if(!res.ok) throw new Error('weather http '+res.status);
     const data = await res.json();
     appState.weather = { lastCenter: {lat,lon}, data };
     renderWeather();
 
-    fetchForecast(lat, lon, key);
-    fetchAQI(lat, lon, key);
+    fetchForecast(lat, lon);
+    fetchAQI(lat, lon);
   }catch(err){
     const el = document.getElementById('wUpdated');
     if(el) el.textContent = 'Weather unavailable';
   }
 }
 
-async function fetchForecast(lat, lon, key){
+async function fetchForecast(lat, lon){
   try{
-    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${key}&units=metric`;
+    const url = `/api/forecast?lat=${lat}&lon=${lon}`;
     const res = await fetch(url); if(!res.ok) throw new Error('forecast http '+res.status);
     const data = await res.json();
     const items = (data.list||[]).slice(0,5).map(x=>({
@@ -829,9 +826,9 @@ async function fetchForecast(lat, lon, key){
   }catch(e){ }
 }
 
-async function fetchAQI(lat, lon, key){
+async function fetchAQI(lat, lon){
   try{
-    const url = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${key}`;
+    const url = `/api/air_pollution?lat=${lat}&lon=${lon}`;
     const res = await fetch(url); if(!res.ok) throw new Error('aqi http '+res.status);
     const data = await res.json();
     const aqi = data.list?.[0]?.main?.aqi || 0;
@@ -907,7 +904,11 @@ function renderForecast(items){
     const t = it.time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     const el = document.createElement('div');
     el.className = 'chip';
-    el.innerHTML = `${t} <span class="small">${it.temp}°C</span>`;
+    el.textContent = `${t} `;
+    const small = document.createElement('span');
+    small.className = 'small';
+    small.textContent = `${it.temp}°C`;
+    el.appendChild(small);
     wrap.appendChild(el);
   });
 }
